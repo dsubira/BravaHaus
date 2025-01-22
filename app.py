@@ -40,5 +40,14 @@ def add_immoble():
     data = request.get_json()
     nou_immoble = Immoble(
         titol=data['titol'],
-        descripcio=data.get('descripcio', 
+        descripcio=data.get('descripcio', ''),
+        preu=data['preu'],
+        ubicacio=data['ubicacio']
+    )
+    db.session.add(nou_immoble)
+    db.session.commit()
+    return jsonify({'message': 'Immoble afegit correctament!'}), 201
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
