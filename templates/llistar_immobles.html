@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Llistat d'Immobles</title>
+</head>
+<body>
+    <h1>Llistat d'Immobles</h1>
+    <ul>
+        {% for immoble in immobles %}
+        <li>
+            <h2>{{ immoble.titol }}</h2>
+            <p>Preu: {{ immoble.preu }}</p>
+            <p>Ubicació: {{ immoble.ubicacio }}</p>
+            <p>Habitacions: {{ immoble.habitacions }}</p>
+            <p>Banys: {{ immoble.banys }}</p>
+            <p>Metres: {{ immoble.metres }}</p>
+            <p>Immobiliària: {{ immoble.immobiliaria }}</p>
+            <p>Anotacions: {{ immoble.anotacions }}</p>
+            <div>
+                {% for foto in immoble.fotos.split(',') %}
+                <img src="{{ foto }}" alt="Foto immoble">
+                {% endfor %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
