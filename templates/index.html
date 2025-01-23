@@ -1,6 +1,17 @@
-{% extends "base.html" %}
-{% block content %}
-<h1>Benvingut a BravaHaus</h1>
-<p>Aquesta és l'aplicació per gestionar immobles.</p>
-<a href="/immobles" class="btn btn-primary">Veure Immobles</a>
-{% endblock %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BravaHaus</title>
+</head>
+<body>
+    <h1>Benvingut a BravaHaus!</h1>
+    <p>Aquí pots gestionar immobles fàcilment.</p>
+
+    <button onclick="window.location.href='/afegir-immoble';">
+        Afegir Immoble
+    </button>
+    <button onclick="window.location.href='/immobles';">
+        Veure Llistat d'Immobles
+    </button>
+</body>
+</html>
