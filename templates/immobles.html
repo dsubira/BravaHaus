@@ -1,20 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Llistat d'Immobles</title>
 </head>
 <body>
     <h1>Llistat d'Immobles</h1>
     <ul>
-        {% for immoble in immobles %}
+    {% for immoble in immobles %}
         <li>
-            <strong>{{ immoble.titol }}</strong> - {{ immoble.preu }}€
-            <p>{{ immoble.descripcio }}</p>
-            <em>{{ immoble.ubicacio }}</em>
+            <strong>{{ immoble.titol }}</strong><br>
+            Preu: {{ immoble.preu }} €<br>
+            Ubicació: {{ immoble.ubicacio }}
         </li>
-        {% endfor %}
+    {% endfor %}
     </ul>
 </body>
 </html>
