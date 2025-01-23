@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestió d'Immobles</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <!-- Enllaç al fitxer CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Font Awesome per a icones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -12,10 +14,10 @@
         <nav>
             <div class="logo">Gestió Immobiliària</div>
             <ul class="menu">
-                <li><a href="/">Inici</a></li>
-                <li><a href="/afegir">Afegir Immoble</a></li>
-                <li><a href="/llistat">Llistat d'Immobles</a></li>
-                <li><a href="/scraping">Scraping</a></li>
+                <li><a href="/" class="{{ 'active' if request.path == '/' else '' }}">Inici</a></li>
+                <li><a href="/afegir" class="{{ 'active' if request.path == '/afegir' else '' }}">Afegir Immoble</a></li>
+                <li><a href="/llistat" class="{{ 'active' if request.path == '/llistat' else '' }}">Llistat d'Immobles</a></li>
+                <li><a href="/scraping" class="{{ 'active' if request.path == '/scraping' else '' }}">Scraping</a></li>
             </ul>
         </nav>
     </header>
@@ -33,3 +35,4 @@
     </footer>
 </body>
 </html>
+
