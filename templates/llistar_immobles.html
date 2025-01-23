@@ -1,30 +1,43 @@
 <!DOCTYPE html>
-<html lang="ca">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Llistat d'Immobles</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
 </head>
 <body>
-    <h1>Llistat d'Immobles</h1>
-    <ul>
-        {% for immoble in immobles %}
-        <li>
-            <h2>{{ immoble.titol }}</h2>
-            <p>Preu: {{ immoble.preu }}</p>
-            <p>Ubicació: {{ immoble.ubicacio }}</p>
-            <p>Habitacions: {{ immoble.habitacions }}</p>
-            <p>Banys: {{ immoble.banys }}</p>
-            <p>Metres: {{ immoble.metres }}</p>
-            <p>Immobiliària: {{ immoble.immobiliaria }}</p>
-            <p>Anotacions: {{ immoble.anotacions }}</p>
-            <div>
-                {% for foto in immoble.fotos.split(',') %}
-                <img src="{{ foto }}" alt="Foto immoble">
+    <div class="container mt-5">
+        <h1 class="text-center">Llistat d'Immobles</h1>
+        <table class="table table-striped mt-4">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Títol</th>
+                    <th>Preu</th>
+                    <th>Adreça</th>
+                    <th>Accions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for immoble in immobles %}
+                <tr>
+                    <td>{{ immoble.id }}</td>
+                    <td>{{ immoble.titol }}</td>
+                    <td>{{ immoble.preu }}</td>
+                    <td>{{ immoble.adreca }}</td>
+                    <td>
+                        <a href="/detalls/{{ immoble.id }}" class="btn btn-info btn-sm">Detalls</a>
+                        <a href="/editar/{{ immoble.id }}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="/eliminar/{{ immoble.id }}" class="btn btn-danger btn-sm">Eliminar</a>
+                    </td>
+                </tr>
                 {% endfor %}
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
+            </tbody>
+        </table>
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-secondary">Tornar a l'inici</a>
+        </div>
+    </div>
 </body>
 </html>
