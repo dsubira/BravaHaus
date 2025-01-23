@@ -21,7 +21,7 @@ class Immoble(db.Model):
 # Ruta principal
 @app.route('/')
 def home():
-    return "Benvingut a BravaHaus!"
+    return render_template('index.html')
 
 # Ruta per consultar immobles
 @app.route('/immobles', methods=['GET'])
