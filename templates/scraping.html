@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scraping d'Immobles</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Gestió Immobiliària</div>
+            <ul class="menu">
+                <li><a href="/">Inici</a></li>
+                <li><a href="/afegir">Afegir Immoble</a></li>
+                <li><a href="/llistat">Llistat d'Immobles</a></li>
+                <li><a href="/scraping">Scraping</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <h1>Scraping d'Immobles</h1>
+            <p>Proporciona una URL d'un portal immobiliari per extreure dades automàticament.</p>
+            <form action="/api/scraping" method="post" id="scraping-form">
+                <label for="url">URL:</label>
+                <input type="url" id="url" name="url" placeholder="Entra la URL aquí" required>
+                <button type="submit" class="btn">Inicia Scraping</button>
+            </form>
+            <div id="resultat"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Gestió Immobiliària. Tots els drets reservats.</p>
+    </footer>
+
+    <script>
+        // Interceptar el formulari per fer una crida AJAX
+        document.getElementById('scraping-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const url = document.getElementById('url').value;
+
+            try {
+                const resposta = await fetch('/api/scraping', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                const dades = await resposta.json();
+
+                if (resposta.ok) {
+                    document.getElementById('resultat').innerHTML =
+                        '<p style="color:green;">Scraping completat correctament!</p>';
+                } else {
+                    document.getElementById('resultat').innerHTML =
+                        `<p style="color:red;">Error: ${dades.error}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('resultat').innerHTML =
+                    `<p style="color:red;">Error del servidor: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
