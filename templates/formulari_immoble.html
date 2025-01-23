@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulari Immoble</title>
+</head>
+<body>
+    <h1>Editar Dades de l'Immoble</h1>
+    <form method="POST" action="/guardar-immoble">
+        <label for="titol">Títol:</label>
+        <input type="text" id="titol" name="titol" value="{{ dades.titol }}" required>
+
+        <label for="preu">Preu:</label>
+        <input type="text" id="preu" name="preu" value="{{ dades.preu }}">
+
+        <label for="ubicacio">Ubicació:</label>
+        <input type="text" id="ubicacio" name="ubicacio" value="{{ dades.ubicacio }}">
+
+        <label for="descripcio">Descripció:</label>
+        <textarea id="descripcio" name="descripcio">{{ dades.descripcio }}</textarea>
+
+        <label for="habitacions">Habitacions:</label>
+        <input type="text" id="habitacions" name="habitacions" value="{{ dades.habitacions }}">
+
+        <label for="banys">Banys:</label>
+        <input type="text" id="banys" name="banys" value="{{ dades.banys }}">
+
+        <label for="m2">M²:</label>
+        <input type="text" id="m2" name="m2" value="{{ dades.m2 }}">
+
+        <label for="immobiliaria">Immobiliària:</label>
+        <input type="text" id="immobiliaria" name="immobiliaria" value="{{ dades.immobiliaria }}">
+
+        <label for="anotacions">Anotacions:</label>
+        <textarea id="anotacions" name="anotacions"></textarea>
+
+        <input type="hidden" name="fotos" value="{{ dades.fotos }}">
+
+        <button type="submit">Guardar immoble</button>
+    </form>
+</body>
+</html>
