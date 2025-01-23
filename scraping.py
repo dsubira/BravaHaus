@@ -1,78 +1,67 @@
 from bs4 import BeautifulSoup
 import requests
 
-def extreure_fotocasa(url):
+def extreure_dades_immobles(url):
     resposta = requests.get(url)
     sopa = BeautifulSoup(resposta.text, 'html.parser')
+
     llistat_immobles = []
 
-    for element in sopa.find_all('article', class_='re-Card'):  # Exemple de classe CSS per Fotocasa
-        adreca = element.find('span', class_='re-Card-title').text if element.find('span', class_='re-Card-title') else 'Desconeguda'
-        ciutat = element.find('span', class_='re-Card-city').text if element.find('span', class_='re-Card-city') else 'Desconeguda'
-        preu = float(element.find('span', class_='re-Card-price').text.replace('€', '').replace(',', '')) if element.find('span', class_='re-Card-price') else 0
-        superficie = float(element.find('span', class_='re-Card-surface').text.replace('m²', '').strip()) if element.find('span', class_='re-Card-surface') else 0
-        habitacions = int(element.find('span', class_='re-Card-rooms').text.strip()) if element.find('span', class_='re-Card-rooms') else 0
+    def obtenir_immoble(element, adreca_cls, preu_cls, superficie_cls, habitacions_cls):
+        try:
+            adreca = element.find('span', class_=adreca_cls).text.strip()
+            ciutat = adreca.split(',')[-1].strip() if ',' in adreca else adreca
+            preu = float(element.find('span', class_=preu_cls).text.replace('€', '').replace('.', '').strip())
+            superficie = float(element.find('span', class_=superficie_cls).text.replace('m²', '').strip())
+            habitacions = int(element.find('span', class_=habitacions_cls).text.strip())
+            return {
+                'adreca': adreca,
+                'ciutat': ciutat,
+                'preu': preu,
+                'superficie': superficie,
+                'habitacions': habitacions
+            }
+        except AttributeError:
+            return None
 
-        llistat_immobles.append({
-            'adreca': adreca,
-            'ciutat': ciutat,
-            'preu': preu,
-            'superficie': superficie,
-            'habitacions': habitacions
-        })
+    # Identificar el portal segons la URL
+    if "fotocasa" in url:
+        for element in sopa.find_all('div', class_='re-Card-pack'):
+            immoble = obtenir_immoble(
+                element,
+                adreca_cls='re-Card-location',
+                preu_cls='re-Card-price',
+                superficie_cls='re-Card-size',
+                habitacions_cls='re-Card-rooms'
+            )
+            if immoble:
+                llistat_immobles.append(immoble)
 
-    return llistat_immobles
+    elif "idealista" in url:
+        for element in sopa.find_all('article', class_='item'):
+            immoble = obtenir_immoble(
+                element,
+                adreca_cls='item-location',
+                preu_cls='item-price',
+                superficie_cls='item-size',
+                habitacions_cls='item-rooms'
+            )
+            if immoble:
+                llistat_immobles.append(immoble)
 
-def extreure_idealista(url):
-    resposta = requests.get(url)
-    sopa = BeautifulSoup(resposta.text, 'html.parser')
-    llistat_immobles = []
+    elif "habitaclia" in url:
+        for element in sopa.find_all('div', class_='list-item'):
+            immoble = obtenir_immoble(
+                element,
+                adreca_cls='list-location',
+                preu_cls='list-price',
+                superficie_cls='list-size',
+                habitacions_cls='list-rooms'
+            )
+            if immoble:
+                llistat_immobles.append(immoble)
 
-    for element in sopa.find_all('div', class_='item-info-container'):  # Exemple de classe CSS per Idealista
-        adreca = element.find('a', class_='item-link').text if element.find('a', class_='item-link') else 'Desconeguda'
-        ciutat = element.find('span', class_='item-location').text if element.find('span', class_='item-location') else 'Desconeguda'
-        preu = float(element.find('span', class_='item-price').text.replace('€', '').replace('.', '').strip()) if element.find('span', class_='item-price') else 0
-        superficie = float(element.find('span', class_='item-size').text.replace('m²', '').strip()) if element.find('span', class_='item-size') else 0
-        habitacions = int(element.find('span', class_='item-rooms').text.strip()) if element.find('span', class_='item-rooms') else 0
-
-        llistat_immobles.append({
-            'adreca': adreca,
-            'ciutat': ciutat,
-            'preu': preu,
-            'superficie': superficie,
-            'habitacions': habitacions
-        })
-
-    return llistat_immobles
-
-def extreure_habitaclia(url):
-    resposta = requests.get(url)
-    sopa = BeautifulSoup(resposta.text, 'html.parser')
-    llistat_immobles = []
-
-    for element in sopa.find_all('div', class_='listing-item'):  # Exemple de classe CSS per Habitaclia
-        adreca = element.find('a', class_='address').text if element.find('a', class_='address') else 'Desconeguda'
-        ciutat = element.find('span', class_='city').text if element.find('span', class_='city') else 'Desconeguda'
-        preu = float(element.find('span', class_='price').text.replace('€', '').replace('.', '').strip()) if element.find('span', class_='price') else 0
-        superficie = float(element.find('span', class_='surface').text.replace('m²', '').strip()) if element.find('span', class_='surface') else 0
-        habitacions = int(element.find('span', class_='rooms').text.strip()) if element.find('span', class_='rooms') else 0
-
-        llistat_immobles.append({
-            'adreca': adreca,
-            'ciutat': ciutat,
-            'preu': preu,
-            'superficie': superficie,
-            'habitacions': habitacions
-        })
-
-    return llistat_immobles
-
-def extreure_dades_immobles(portal, url):
-    if portal == 'fotocasa':
-        return extreure_fotocasa(url)
-    elif portal == 'idealista':
-        return extreure_idealista(url)
-    elif portal == 'habitaclia':
-        return extreure_habitaclia(url)
     else:
-        raise ValueError(f'Portal desconegut: {portal}')
+        raise ValueError("El portal no està suportat actualment.")
+
+    return llistat_immobles
