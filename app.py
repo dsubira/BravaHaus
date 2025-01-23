@@ -15,7 +15,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
-# Model de la base de dades
+# Model de la base de dades.
 class Immoble(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     adreca = db.Column(db.String(200), nullable=False)
