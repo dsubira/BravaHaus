@@ -3,7 +3,7 @@ from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from dotenv import load_dotenv
-from scraping import extreure_dades_immobles
+from api.scraping import extreure_dades_immobles
 
 # Carregar variables d'entorn.
 load_dotenv()
