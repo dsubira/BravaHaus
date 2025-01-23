@@ -1,43 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ca">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Llistat d'Immobles</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center">Llistat d'Immobles</h1>
-        <table class="table table-striped mt-4">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Títol</th>
-                    <th>Preu</th>
-                    <th>Adreça</th>
-                    <th>Accions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for immoble in immobles %}
-                <tr>
-                    <td>{{ immoble.id }}</td>
-                    <td>{{ immoble.titol }}</td>
-                    <td>{{ immoble.preu }}</td>
-                    <td>{{ immoble.adreca }}</td>
-                    <td>
-                        <a href="/detalls/{{ immoble.id }}" class="btn btn-info btn-sm">Detalls</a>
-                        <a href="/editar/{{ immoble.id }}" class="btn btn-warning btn-sm">Editar</a>
-                        <a href="/eliminar/{{ immoble.id }}" class="btn btn-danger btn-sm">Eliminar</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <div class="text-center mt-4">
-            <a href="/" class="btn btn-secondary">Tornar a l'inici</a>
+    <header>
+        <h1>Llistat d'Immobles</h1>
+    </header>
+    <main>
+        <div class="container">
+            <table class="llistat">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Adreça</th>
+                        <th>Ciutat</th>
+                        <th>Preu (€)</th>
+                        <th>Superfície (m²)</th>
+                        <th>Habitacions</th>
+                        <th>Estat Reforma</th>
+                        <th>Fotos</th>
+                        <th>Cost Reforma Estimat (€)</th>
+                        <th>Preu Objectiu (€)</th>
+                        <th>Estat Ocupacional</th>
+                        <th>Informació Urbanística</th>
+                        <th>Latitud</th>
+                        <th>Longitud</th>
+                    </tr>
+                </thead>
+                <tbody id="immobles-taula">
+                    <!-- Les files es generaran dinàmicament amb JavaScript -->
+                </tbody>
+            </table>
         </div>
-    </div>
+    </main>
+    <footer>
+        <p>&copy; 2025 - Gestió d'Immobles</p>
+    </footer>
+    <script>
+        // Obtenir dades des de l'API
+        fetch('/api/immobles')
+            .then((res) => res.json())
+            .then((dades) => {
+                const taula = document.getElementById('immobles-taula');
+                dades.forEach((immoble) => {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${immoble.id}</td>
+                        <td>${immoble.adreca}</td>
+                        <td>${immoble.ciutat}</td>
+                        <td>${immoble.preu.toLocaleString()}</td>
+                        <td>${immoble.superficie}</td>
+                        <td>${immoble.habitacions}</td>
+                        <td>${immoble.estat_reforma || 'No especificat'}</td>
+                        <td>
+                            ${immoble.fotos ? immoble.fotos.split(',').map(url => `<a href="${url}" target="_blank">Foto</a>`).join(' | ') : 'Sense fotos'}
+                        </td>
+                        <td>${immoble.cost_reforma_estim || 'No disponible'}</td>
+                        <td>${immoble.preu_objectiu || 'No disponible'}</td>
+                        <td>${immoble.estat_ocupacional || 'No especificat'}</td>
+                        <td>${immoble.informacio_urbanistica || 'No disponible'}</td>
+                        <td>${immoble.latitud || 'No disponible'}</td>
+                        <td>${immoble.longitud || 'No disponible'}</td>
+                    `;
+                    taula.appendChild(fila);
+                });
+            })
+            .catch((error) => {
+                console.error('Error carregant els immobles:', error);
+            });
+    </script>
 </body>
 </html>
