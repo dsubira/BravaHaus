@@ -3,7 +3,8 @@ from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from dotenv import load_dotenv
-from scraping import extreure_dades_immobles  # Importar la lògica centralitzada de scraping
+from geopy.geocoders import Nominatim
+from scraping import extreure_dades_immobles
 
 # Carregar variables d'entorn
 load_dotenv()
@@ -24,7 +25,7 @@ class Immoble(db.Model):
     superficie = db.Column(db.Float, nullable=False)
     habitacions = db.Column(db.Integer, nullable=False)
     estat_reforma = db.Column(db.String(100), nullable=True)
-    fotos = db.Column(db.Text, nullable=True)  # Emmagatzema URLs de fotos separades per comes
+    fotos = db.Column(db.Text, nullable=True)
     cost_reforma_estim = db.Column(db.Float, nullable=True)
     preu_objectiu = db.Column(db.Float, nullable=True)
     estat_ocupacional = db.Column(db.String(100), nullable=True)
