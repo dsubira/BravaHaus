@@ -1,32 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ca">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Afegir Immoble</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center">Afegir Immoble</h1>
-        <form method="POST" action="/afegir">
-            <div class="mb-3">
-                <label for="titol" class="form-label">Títol</label>
-                <input type="text" class="form-control" id="titol" name="titol" required>
-            </div>
-            <div class="mb-3">
-                <label for="preu" class="form-label">Preu</label>
-                <input type="number" class="form-control" id="preu" name="preu" required>
-            </div>
-            <div class="mb-3">
-                <label for="adreca" class="form-label">Adreça</label>
-                <input type="text" class="form-control" id="adreca" name="adreca" required>
-            </div>
-            <div class="text-center mt-4">
-                <button type="submit" class="btn btn-success">Afegir</button>
-                <a href="/" class="btn btn-secondary">Cancel·lar</a>
-            </div>
-        </form>
-    </div>
+    <header>
+        <nav>
+            <div class="logo">Gestió Immobiliària</div>
+            <ul class="menu">
+                <li><a href="/">Inici</a></li>
+                <li><a href="/afegir">Afegir Immoble</a></li>
+                <li><a href="/llistat">Llistat d'Immobles</a></li>
+                <li><a href="/scraping">Scraping</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="form-section">
+            <h1>Afegir Immoble Manualment</h1>
+            <form id="formulari-immoble" action="/api/immobles" method="POST">
+                <label for="adreca">Adreça:</label>
+                <input type="text" id="adreca" name="adreca" placeholder="Adreça completa" required>
+
+                <label for="ciutat">Ciutat:</label>
+                <input type="text" id="ciutat" name="ciutat" placeholder="Ciutat" required>
+
+                <label for="preu">Preu (€):</label>
+                <input type="number" id="preu" name="preu" placeholder="Preu de l'immoble" required step="0.01">
+
+                <label for="superficie">Superfície (m²):</label>
+                <input type="number" id="superficie" name="superficie" placeholder="Superfície en m²" required step="0.01">
+
+                <label for="habitacions">Habitacions:</label>
+                <input type="number" id="habitacions" name="habitacions" placeholder="Nombre d'habitacions" required>
+
+                <label for="estat_reforma">Estat de reforma:</label>
+                <select id="estat_reforma" name="estat_reforma">
+                    <option value="Nou">Nou</option>
+                    <option value="Reformat">Reformat</option>
+                    <option value="A reformar">A reformar</option>
+                </select>
+
+                <label for="fotos">Fotos (URLs separades per comes):</label>
+                <input type="text" id="fotos" name="fotos" placeholder="http://exemple.com/foto1.jpg, http://exemple.com/foto2.jpg">
+
+                <label for="cost_reforma_estim">Cost estimat de reforma (€):</label>
+                <input type="number" id="cost_reforma_estim" name="cost_reforma_estim" placeholder="Cost aproximat" step="0.01">
+
+                <label for="preu_objectiu">Preu objectiu (€):</label>
+                <input type="number" id="preu_objectiu" name="preu_objectiu" placeholder="Preu desitjat" step="0.01">
+
+                <label for="estat_ocupacional">Estat ocupacional:</label>
+                <select id="estat_ocupacional" name="estat_ocupacional">
+                    <option value="Lliure">Lliure</option>
+                    <option value="Ocupat">Ocupat</option>
+                    <option value="Llogat">Llogat</option>
+                </select>
+
+                <label for="informacio_urbanistica">Informació urbanística:</label>
+                <textarea id="informacio_urbanistica" name="informacio_urbanistica" rows="4" placeholder="Detalls addicionals sobre l'immoble"></textarea>
+
+                <label for="latitud">Latitud:</label>
+                <input type="text" id="latitud" name="latitud" placeholder="Latitud geogràfica">
+
+                <label for="longitud">Longitud:</label>
+                <input type="text" id="longitud" name="longitud" placeholder="Longitud geogràfica">
+
+                <button type="submit" class="btn">Afegir Immoble</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Gestió Immobiliària. Tots els drets reservats.</p>
+    </footer>
 </body>
 </html>
+
