@@ -27,12 +27,17 @@ def home():
 @app.route('/immobles', methods=['GET'])
 def get_immobles():
     immobles = Immoble.query.all()
-    return jsonify([{
-        'id': i.id,
-        'titol': i.titol,
-        'preu': float(i.preu),
-        'ubicacio': i.ubicacio
-    } for i in immobles])
+    return render_template('immobles.html', immobles=immobles)
+
+#@app.route('/immobles', methods=['GET'])
+#def get_immobles():
+#    immobles = Immoble.query.all()
+#    return jsonify([{
+#        'id': i.id,
+#        'titol': i.titol,
+#        'preu': float(i.preu),
+#        'ubicacio': i.ubicacio
+#    } for i in immobles])
 
 # Ruta per afegir immobles
 @app.route('/immobles', methods=['POST'])
