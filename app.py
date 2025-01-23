@@ -3,7 +3,7 @@ from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from dotenv import load_dotenv
-from geopy.geocoders import Nominatim
+from scraping import extreure_dades_immobles  # Importar la lògica centralitzada de scraping
 
 # Carregar variables d'entorn
 load_dotenv()
@@ -105,6 +105,26 @@ def eliminar_immoble(id):
     db.session.delete(immoble)
     db.session.commit()
     return '', 204
+
+@app.route('/api/scraping', methods=['POST'])
+def scraping_immobles():
+    url = request.json.get('url')
+    if not url:
+        return jsonify({'error': 'Cal proporcionar una URL'}), 400
+
+    dades_immobles = extreure_dades_immobles(url)
+    for dades in dades_immobles:
+        nou_immoble = Immoble(
+            adreca=dades['adreca'],
+            ciutat=dades['ciutat'],
+            preu=dades['preu'],
+            superficie=dades['superficie'],
+            habitacions=dades['habitacions']
+        )
+        db.session.add(nou_immoble)
+    db.session.commit()
+
+    return jsonify({'missatge': 'Dades extretes i afegides correctament'}), 201
 
 if __name__ == '__main__':
     with app.app_context():
