@@ -8,13 +8,9 @@ from api.scraping import extreure_dades_immobles
 # Carregar variables d'entorn.
 load_dotenv()
 
-# Configuració de la base de dades
 database_url = os.getenv('DATABASE_URL')
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://")
-
-if not database_url:
-    raise RuntimeError("La variable d'entorn 'DATABASE_URL' no està configurada!")
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
@@ -48,11 +44,24 @@ class ImmobleSchema(ma.SQLAlchemyAutoSchema):
 immoble_schema = ImmobleSchema()
 immobles_schema = ImmobleSchema(many=True)
 
-# Rutes
+# Rutes principals
 @app.route('/')
 def index():
     return render_template('index.html')
 
+@app.route('/afegir')
+def afegir_immoble():
+    return render_template('afegir_immoble.html')
+
+@app.route('/llistat')
+def llistar_immobles():
+    return render_template('llistar_immobles.html')
+
+@app.route('/scraping')
+def scraping():
+    return render_template('scraping.html')
+
+# Rutes de l'API
 @app.route('/api/immobles', methods=['GET'])
 def obtenir_immobles():
     immobles = Immoble.query.all()
@@ -64,29 +73,55 @@ def obtenir_immoble(id):
     return jsonify(immoble_schema.dump(immoble))
 
 @app.route('/api/immobles', methods=['POST'])
-def afegir_immoble():
-    try:
-        dades = request.json
-        nou_immoble = Immoble(
-            adreca=dades['adreca'],
-            ciutat=dades['ciutat'],
-            preu=dades['preu'],
-            superficie=dades['superficie'],
-            habitacions=dades['habitacions'],
-            estat_reforma=dades.get('estat_reforma'),
-            fotos=dades.get('fotos'),
-            cost_reforma_estim=dades.get('cost_reforma_estim'),
-            preu_objectiu=dades.get('preu_objectiu'),
-            estat_ocupacional=dades.get('estat_ocupacional'),
-            informacio_urbanistica=dades.get('informacio_urbanistica'),
-            latitud=dades.get('latitud'),
-            longitud=dades.get('longitud')
-        )
-        db.session.add(nou_immoble)
-        db.session.commit()
-        return jsonify(immoble_schema.dump(nou_immoble)), 201
-    except Exception as e:
-        return jsonify({"error": f"Hi ha hagut un error: {str(e)}"}), 400
+def afegir_immoble_api():
+    dades = request.json
+    nou_immoble = Immoble(
+        adreca=dades['adreca'],
+        ciutat=dades['ciutat'],
+        preu=dades['preu'],
+        superficie=dades['superficie'],
+        habitacions=dades['habitacions'],
+        estat_reforma=dades.get('estat_reforma'),
+        fotos=dades.get('fotos'),
+        cost_reforma_estim=dades.get('cost_reforma_estim'),
+        preu_objectiu=dades.get('preu_objectiu'),
+        estat_ocupacional=dades.get('estat_ocupacional'),
+        informacio_urbanistica=dades.get('informacio_urbanistica'),
+        latitud=dades.get('latitud'),
+        longitud=dades.get('longitud')
+    )
+    db.session.add(nou_immoble)
+    db.session.commit()
+    return jsonify(immoble_schema.dump(nou_immoble)), 201
+
+@app.route('/api/immobles/<int:id>', methods=['PUT'])
+def actualitzar_immoble(id):
+    immoble = Immoble.query.get_or_404(id)
+    dades = request.json
+
+    immoble.adreca = dades.get('adreca', immoble.adreca)
+    immoble.ciutat = dades.get('ciutat', immoble.ciutat)
+    immoble.preu = dades.get('preu', immoble.preu)
+    immoble.superficie = dades.get('superficie', immoble.superficie)
+    immoble.habitacions = dades.get('habitacions', immoble.habitacions)
+    immoble.estat_reforma = dades.get('estat_reforma', immoble.estat_reforma)
+    immoble.fotos = dades.get('fotos', immoble.fotos)
+    immoble.cost_reforma_estim = dades.get('cost_reforma_estim', immoble.cost_reforma_estim)
+    immoble.preu_objectiu = dades.get('preu_objectiu', immoble.preu_objectiu)
+    immoble.estat_ocupacional = dades.get('estat_ocupacional', immoble.estat_ocupacional)
+    immoble.informacio_urbanistica = dades.get('informacio_urbanistica', immoble.informacio_urbanistica)
+    immoble.latitud = dades.get('latitud', immoble.latitud)
+    immoble.longitud = dades.get('longitud', immoble.longitud)
+
+    db.session.commit()
+    return jsonify(immoble_schema.dump(immoble))
+
+@app.route('/api/immobles/<int:id>', methods=['DELETE'])
+def eliminar_immoble(id):
+    immoble = Immoble.query.get_or_404(id)
+    db.session.delete(immoble)
+    db.session.commit()
+    return '', 204
 
 @app.route('/api/scraping', methods=['POST'])
 def scraping_immobles():
@@ -94,26 +129,22 @@ def scraping_immobles():
     if not url:
         return jsonify({'error': 'Cal proporcionar una URL'}), 400
 
-    try:
-        dades_immobles = extreure_dades_immobles(url)
-        for dades in dades_immobles:
-            nou_immoble = Immoble(
-                adreca=dades['adreca'],
-                ciutat=dades['ciutat'],
-                preu=dades['preu'],
-                superficie=dades['superficie'],
-                habitacions=dades['habitacions']
-            )
-            db.session.add(nou_immoble)
-        db.session.commit()
+    dades_immobles = extreure_dades_immobles(url)
+    for dades in dades_immobles:
+        nou_immoble = Immoble(
+            adreca=dades['adreca'],
+            ciutat=dades['ciutat'],
+            preu=dades['preu'],
+            superficie=dades['superficie'],
+            habitacions=dades['habitacions']
+        )
+        db.session.add(nou_immoble)
+    db.session.commit()
 
-        return jsonify({'missatge': 'Dades extretes i afegides correctament'}), 201
-    except Exception as e:
-        return jsonify({'error': f"Hi ha hagut un problema durant l'scraping: {str(e)}"}), 500
+    return jsonify({'missatge': 'Dades extretes i afegides correctament'}), 201
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=os.getenv("FLASK_DEBUG", "False") == "True")
-
+    app.run(debug=True)
 
