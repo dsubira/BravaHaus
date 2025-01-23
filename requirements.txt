@@ -7,3 +7,4 @@ requests
 geopy
 python-dotenv
 flask-marshmallow
+marshmallow-sqlalchemy
