@@ -1,15 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import requests
 from bs4 import BeautifulSoup
+from geopy.geocoders import Nominatim
 
 app = Flask(__name__)
+
+# Configuració de la base de dades
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://ua1opglmi2dcvp:pb2846a65596ce3eaf1efe7be5ed91d369e1af83651c418d3a77c28920640634b@cah8ha8ra8h8i7.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com:5432/d34184f0va5qsb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Model de la base de dades
+# Model de dades
 class Immoble(db.Model):
     __tablename__ = 'immobles'
     id = db.Column(db.Integer, primary_key=True)
@@ -17,76 +20,109 @@ class Immoble(db.Model):
     descripcio = db.Column(db.Text)
     preu = db.Column(db.Numeric, nullable=False)
     ubicacio = db.Column(db.String(255))
+    latitud = db.Column(db.Float)
+    longitud = db.Column(db.Float)
+    habitacions = db.Column(db.Integer)
+    banys = db.Column(db.Integer)
+    m2 = db.Column(db.Float)
+    immobiliaria = db.Column(db.String(255))
+    fotos = db.Column(db.Text)  # Emmagatzema URLs separades per comes
+    anotacions = db.Column(db.Text)
 
-@app.route('/afegir-immoble', methods=['GET', 'POST'])
-def afegir_immoble():
-    if request.method == 'POST':
-        url = request.form.get('url')
-        titol = request.form.get('titol')
-        descripcio = request.form.get('descripcio')
-        preu = request.form.get('preu')
-        ubicacio = request.form.get('ubicacio')
-
-        # Si hi ha URL, extreure dades automàticament
-        if url:
-            try:
-                dades_extretes = extreu_dades_immoble(url)
-                if dades_extretes:
-                    titol = dades_extretes.get('titol', titol)
-                    descripcio = dades_extretes.get('descripcio', descripcio)
-                    preu = dades_extretes.get('preu', preu)
-                    ubicacio = dades_extretes.get('ubicacio', ubicacio)
-            except Exception as e:
-                return jsonify({"error": f"No s'ha pogut processar l'URL: {e}"}), 400
-
-        nou_immoble = Immoble(
-            titol=titol,
-            descripcio=descripcio,
-            preu=preu,
-            ubicacio=ubicacio
-        )
-        db.session.add(nou_immoble)
-        db.session.commit()
-        return redirect(url_for('get_immobles'))
-
-    return render_template('afegir_immoble.html')
-
-def extreu_dades_immoble(url):
-    """Funció per extreure dades des d'un enllaç de Fotocasa o Habitaclia."""
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    page = requests.get(url, headers=headers)
-    soup = BeautifulSoup(page.content, 'html.parser')
-
-    # Exemples d'extracció per Fotocasa
-    if 'fotocasa.es' in url:
-        titol = soup.find('h1', class_='re-DetailHeader-propertyTitle').text.strip()
-        descripcio = soup.find('div', class_='re-DetailFeatures-description').text.strip()
-        preu = soup.find('span', class_='re-DetailHeader-price').text.strip().replace('€', '').replace('.', '')
-        ubicacio = soup.find('span', class_='re-DetailHeader-address-text').text.strip()
-        return {'titol': titol, 'descripcio': descripcio, 'preu': preu, 'ubicacio': ubicacio}
-
-    # Exemples d'extracció per Habitaclia
-    elif 'habitaclia.com' in url:
-        titol = soup.find('h1', class_='info-title').text.strip()
-        descripcio = soup.find('div', class_='adDescription').text.strip()
-        preu = soup.find('span', class_='price').text.strip().replace('€', '').replace('.', '')
-        ubicacio = soup.find('span', class_='address').text.strip()
-        return {'titol': titol, 'descripcio': descripcio, 'preu': preu, 'ubicacio': ubicacio}
-
-    else:
-        raise ValueError("Només es permeten enllaços de Fotocasa i Habitaclia.")
+# Inicialitzar la base de dades
+@app.before_first_request
+def create_tables():
+    db.create_all()
 
 # Ruta principal
 @app.route('/')
 def home():
     return render_template('index.html')
 
-# Ruta per veure immobles
-@app.route('/immobles', methods=['GET'])
-def get_immobles():
+# Ruta per llistar immobles
+@app.route('/llistar-immobles')
+def llistar_immobles():
     immobles = Immoble.query.all()
-    return render_template('immobles.html', immobles=immobles)
+    return render_template('llistar_immobles.html', immobles=immobles)
+
+# Ruta per afegir immobles manualment
+@app.route('/afegir-immoble', methods=['GET', 'POST'])
+def afegir_immoble():
+    if request.method == 'POST':
+        data = request.form
+
+        # Geolocalització
+        geolocator = Nominatim(user_agent="bravahaus")
+        location = geolocator.geocode(data['ubicacio'])
+        latitud = location.latitude if location else None
+        longitud = location.longitude if location else None
+
+        nou_immoble = Immoble(
+            titol=data['titol'],
+            descripcio=data['descripcio'],
+            preu=data['preu'],
+            ubicacio=data['ubicacio'],
+            latitud=latitud,
+            longitud=longitud,
+            habitacions=data.get('habitacions', None),
+            banys=data.get('banys', None),
+            m2=data.get('m2', None),
+            immobiliaria=data.get('immobiliaria', None),
+            fotos=data.get('fotos', None),
+            anotacions=data.get('anotacions', None)
+        )
+
+        db.session.add(nou_immoble)
+        db.session.commit()
+        return redirect(url_for('llistar_immobles'))
+
+    return render_template('afegir_immoble.html')
+
+# Ruta per afegir immobles des d'un enllaç
+@app.route('/captura-enllac', methods=['POST'])
+def captura_enllac():
+    url = request.form['url']
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # Captura d'informació específica (personalitzada per Fotocasa)
+    titol = soup.find('h1').get_text(strip=True)
+    preu = soup.find('span', class_='re-DetailHeader-price').get_text(strip=True).replace('€', '').replace('.', '')
+    descripcio = soup.find('div', class_='re-DetailDescription-text').get_text(strip=True)
+    ubicacio = soup.find('span', class_='re-DetailHeader-address-text').get_text(strip=True)
+
+    # Altres camps específics
+    habitacions = int(soup.find('span', class_='re-DetailFeatures-value').get_text(strip=True))
+    banys = int(soup.find_all('span', class_='re-DetailFeatures-value')[1].get_text(strip=True))
+    m2 = float(soup.find('span', class_='re-DetailFeatures-value').get_text(strip=True).replace('m²', '').strip())
+    immobiliaria = soup.find('div', class_='re-ContactDetail-ownerName').get_text(strip=True)
+    fotos = ','.join([img['src'] for img in soup.find_all('img', class_='re-DetailMediaPhoto')])
+
+    # Geolocalització
+    geolocator = Nominatim(user_agent="bravahaus")
+    location = geolocator.geocode(ubicacio)
+    latitud = location.latitude if location else None
+    longitud = location.longitude if location else None
+
+    # Afegir a la base de dades
+    nou_immoble = Immoble(
+        titol=titol,
+        descripcio=descripcio,
+        preu=preu,
+        ubicacio=ubicacio,
+        latitud=latitud,
+        longitud=longitud,
+        habitacions=habitacions,
+        banys=banys,
+        m2=m2,
+        immobiliaria=immobiliaria,
+        fotos=fotos
+    )
+
+    db.session.add(nou_immoble)
+    db.session.commit()
+
+    return jsonify({'message': 'Immoble capturat correctament!'})
 
 if __name__ == '__main__':
     app.run(debug=True)
-
