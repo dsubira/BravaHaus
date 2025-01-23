@@ -1,25 +1,20 @@
-{% extends "base.html" %}
-{% block content %}
-<h1>Llistat d'Immobles</h1>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Títol</th>
-            <th>Preu</th>
-            <th>Ubicació</th>
-        </tr>
-    </thead>
-    <tbody>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Llistat d'Immobles</title>
+</head>
+<body>
+    <h1>Llistat d'Immobles</h1>
+    <ul>
         {% for immoble in immobles %}
-        <tr>
-            <td>{{ immoble.id }}</td>
-            <td>{{ immoble.titol }}</td>
-            <td>{{ immoble.preu }}</td>
-            <td>{{ immoble.ubicacio }}</td>
-        </tr>
+        <li>
+            <strong>{{ immoble.titol }}</strong> - {{ immoble.preu }}€
+            <p>{{ immoble.descripcio }}</p>
+            <em>{{ immoble.ubicacio }}</em>
+        </li>
         {% endfor %}
-    </tbody>
-</table>
-<a href="/" class="btn btn-secondary">Tornar</a>
-{% endblock %}
+    </ul>
+</body>
+</html>
