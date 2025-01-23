@@ -5,20 +5,24 @@
 </head>
 <body>
     <h1>Afegir Immoble</h1>
-    <form method="POST" action="/afegir-immoble">
-        <label for="titol">Títol:</label>
-        <input type="text" id="titol" name="titol" required><br>
+<form method="POST">
+  <label for="url">Enllaç de l'immoble (Fotocasa o Habitaclia):</label>
+  <input type="url" id="url" name="url" placeholder="Enganxa aquí l'enllaç" style="width: 100%; margin-bottom: 1em;">
+  
+  <label for="titol">Títol:</label>
+  <input type="text" id="titol" name="titol" placeholder="Títol de l'immoble" required>
+  
+  <label for="descripcio">Descripció:</label>
+  <textarea id="descripcio" name="descripcio" placeholder="Descripció de l'immoble"></textarea>
+  
+  <label for="preu">Preu:</label>
+  <input type="number" id="preu" name="preu" placeholder="Preu en euros" required>
+  
+  <label for="ubicacio">Ubicació:</label>
+  <input type="text" id="ubicacio" name="ubicacio" placeholder="Ubicació de l'immoble" required>
+  
+  <button type="submit">Afegir Immoble</button>
+</form>
 
-        <label for="descripcio">Descripció:</label>
-        <textarea id="descripcio" name="descripcio"></textarea><br>
-
-        <label for="preu">Preu:</label>
-        <input type="number" id="preu" name="preu" required><br>
-
-        <label for="ubicacio">Ubicació:</label>
-        <input type="text" id="ubicacio" name="ubicacio" required><br>
-
-        <button type="submit">Afegir</button>
-    </form>
 </body>
 </html>
