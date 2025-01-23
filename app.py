@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -9,7 +9,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Model d'exemple per a immobles
+# Exemple de model (immobles)
 class Immoble(db.Model):
     __tablename__ = 'immobles'
     id = db.Column(db.Integer, primary_key=True)
@@ -27,28 +27,28 @@ def home():
 @app.route('/immobles', methods=['GET'])
 def get_immobles():
     immobles = Immoble.query.all()
-    return jsonify([{
-        'id': i.id,
-        'titol': i.titol,
-        'preu': float(i.preu),
-        'ubicacio': i.ubicacio
-    } for i in immobles])
+    return render_template('immobles.html', immobles=immobles)
 
 # Ruta per afegir immobles
-@app.route('/immobles', methods=['POST'])
-def add_immoble():
-    data = request.get_json()
-    nou_immoble = Immoble(
-        titol=data['titol'],
-        descripcio=data.get('descripcio', ''),
-        preu=data['preu'],
-        ubicacio=data['ubicacio']
-    )
-    db.session.add(nou_immoble)
-    db.session.commit()
-    return jsonify({'message': 'Immoble afegit correctament!'}), 201
+@app.route('/afegir-immoble', methods=['GET', 'POST'])
+def afegir_immoble():
+    if request.method == 'POST':
+        titol = request.form.get('titol')
+        descripcio = request.form.get('descripcio')
+        preu = request.form.get('preu')
+        ubicacio = request.form.get('ubicacio')
+
+        nou_immoble = Immoble(
+            titol=titol,
+            descripcio=descripcio,
+            preu=preu,
+            ubicacio=ubicacio
+        )
+        db.session.add(nou_immoble)
+        db.session.commit()
+
+        return "Immoble afegit correctament!"
+    return render_template('afegir_immoble.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
