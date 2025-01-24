@@ -1,38 +1,61 @@
 <!DOCTYPE html>
 <html lang="ca">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestió d'Immobles</title>
-    <!-- Enllaç al fitxer CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <!-- Font Awesome per a icones -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>BravaHaus</title>
+    <link rel="stylesheet" href="estils.css">
 </head>
+
 <body>
     <header>
-        <nav>
-            <div class="logo">Gestió Immobiliària</div>
-            <ul class="menu">
-                <li><a href="/" class="{{ 'active' if request.path == '/' else '' }}">Inici</a></li>
-                <li><a href="/afegir" class="{{ 'active' if request.path == '/afegir' else '' }}">Afegir Immoble</a></li>
-                <li><a href="/llistat" class="{{ 'active' if request.path == '/llistat' else '' }}">Llistat d'Immobles</a></li>
-                <li><a href="/scraping" class="{{ 'active' if request.path == '/scraping' else '' }}">Scraping</a></li>
-            </ul>
-        </nav>
+        <div class="container">
+            <h1>BravaHaus</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">Inici</a></li>
+                    <li><a href="/add">Afegeix un immoble</a></li>
+                    <li><a href="/list">Consulta els immobles</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
     <main>
-        <section class="hero">
-            <h1>Benvingut a la Gestió Immobiliària</h1>
-            <p>Gestiona fàcilment els teus immobles amb les nostres eines modernes.</p>
-            <a href="/llistat" class="btn">Veure Immobles</a>
+        <section id="property-list">
+            <div class="property-card">
+                <img src="https://via.placeholder.com/150" alt="Imatge de l'immoble">
+                <div class="property-details">
+                    <h2>Apartament modern</h2>
+                    <p><span class="icon">📍</span> Ubicació: Barcelona</p>
+                    <p><span class="icon">💰</span> Preu: 250.000 €</p>
+                    <p><span class="icon">🏠</span> Superfície: 80m²</p>
+                    <p><span class="icon">🛏️</span> Habitacions: 2 | <span class="icon">🛁</span> Banys: 1</p>
+                </div>
+                <button>Veure detalls</button>
+            </div>
+
+            <div class="property-card">
+                <img src="https://via.placeholder.com/150" alt="Imatge de l'immoble">
+                <div class="property-details">
+                    <h2>Estudi acollidor</h2>
+                    <p><span class="icon">📍</span> Ubicació: Girona</p>
+                    <p><span class="icon">💰</span> Preu: 120.000 €</p>
+                    <p><span class="icon">🏠</span> Superfície: 50m²</p>
+                    <p><span class="icon">🛏️</span> Habitacions: 1 | <span class="icon">🛁</span> Banys: 1</p>
+                </div>
+                <button>Veure detalls</button>
+            </div>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2025 Gestió Immobiliària. Tots els drets reservats.</p>
+        <div class="container">
+            <p>&copy; 2025 BravaHaus. Tots els drets reservats.</p>
+        </div>
     </footer>
 </body>
+
 </html>
 
