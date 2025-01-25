@@ -5,12 +5,15 @@ def extreure_dades_immobles(url):
     """
     Extreu dades d'immobles d'una URL d'un portal suportat.
     Suporta Fotocasa, Idealista i Habitaclia.
-    
+
     Args:
         url (str): URL del portal immobiliari.
-    
+
     Returns:
         list[dict]: Llista d'immobles amb les dades extretes.
+    
+    Raises:
+        ValueError: Si hi ha errors en la petició o el portal no està suportat.
     """
     try:
         # Fer la petició HTTP
@@ -19,6 +22,11 @@ def extreure_dades_immobles(url):
     except requests.RequestException as e:
         raise ValueError(f"Error en la petició a la URL: {e}")
 
+    # Comprovem que el contingut és HTML
+    if not resposta.headers.get('Content-Type', '').startswith('text/html'):
+        raise ValueError(f"La URL no retorna HTML. Content-Type: {resposta.headers.get('Content-Type')}")
+
+    # Analitzem el contingut HTML
     sopa = BeautifulSoup(resposta.text, 'html.parser')
     llistat_immobles = []
 
@@ -90,3 +98,11 @@ def extreure_dades_immobles(url):
     # Retornem la llista d'immobles
     return llistat_immobles
 
+if __name__ == "__main__":
+    # Proves locals amb una URL exemple
+    url_prova = "https://www.fotocasa.es"
+    try:
+        immobles = extreure_dades_immobles(url_prova)
+        print(f"Immobles extrets: {immobles}")
+    except ValueError as e:
+        print(f"Error: {e}")
