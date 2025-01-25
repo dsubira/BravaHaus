@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scraping d'Immobles</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estils.css') }}">
 </head>
 <body>
     <header>
@@ -52,8 +52,17 @@
                 const dades = await resposta.json();
 
                 if (resposta.ok) {
+                    const immoblesHTML = dades.map(immoble => `
+                        <div>
+                            <h2>${immoble.adreca}</h2>
+                            <p><strong>Ciutat:</strong> ${immoble.ciutat}</p>
+                            <p><strong>Preu:</strong> ${immoble.preu} €</p>
+                        </div>
+                    `).join('');
+
                     document.getElementById('resultat').innerHTML =
-                        '<p style="color:green;">Scraping completat correctament!</p>';
+                        `<p style="color:green;">Scraping completat correctament!</p>
+                        ${immoblesHTML}`;
                 } else {
                     document.getElementById('resultat').innerHTML =
                         `<p style="color:red;">Error: ${dades.error}</p>`;
@@ -66,3 +75,4 @@
     </script>
 </body>
 </html>
+
