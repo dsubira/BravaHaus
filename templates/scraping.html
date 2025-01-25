@@ -12,8 +12,6 @@
             <div class="logo">Gestió Immobiliària</div>
             <ul class="menu">
                 <li><a href="/">Inici</a></li>
-                <li><a href="/afegir">Afegir Immoble</a></li>
-                <li><a href="/llistat">Llistat d'Immobles</a></li>
                 <li><a href="/scraping">Scraping</a></li>
             </ul>
         </nav>
@@ -37,7 +35,6 @@
     </footer>
 
     <script>
-        // Interceptar el formulari per fer una crida AJAX
         document.getElementById('scraping-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const url = document.getElementById('url').value;
@@ -52,17 +49,22 @@
                 const dades = await resposta.json();
 
                 if (resposta.ok) {
-                    const immoblesHTML = dades.map(immoble => `
-                        <div>
-                            <h2>${immoble.adreca}</h2>
-                            <p><strong>Ciutat:</strong> ${immoble.ciutat}</p>
-                            <p><strong>Preu:</strong> ${immoble.preu} €</p>
-                        </div>
-                    `).join('');
+                    if (Array.isArray(dades)) {
+                        const immoblesHTML = dades.map(immoble => `
+                            <div>
+                                <h2>${immoble.adreca}</h2>
+                                <p><strong>Ciutat:</strong> ${immoble.ciutat}</p>
+                                <p><strong>Preu:</strong> ${immoble.preu} €</p>
+                            </div>
+                        `).join('');
 
-                    document.getElementById('resultat').innerHTML =
-                        `<p style="color:green;">Scraping completat correctament!</p>
-                        ${immoblesHTML}`;
+                        document.getElementById('resultat').innerHTML =
+                            `<p style="color:green;">Scraping completat correctament!</p>
+                            ${immoblesHTML}`;
+                    } else {
+                        document.getElementById('resultat').innerHTML =
+                            `<p style="color:red;">Error: Resposta inesperada del servidor.</p>`;
+                    }
                 } else {
                     document.getElementById('resultat').innerHTML =
                         `<p style="color:red;">Error: ${dades.error}</p>`;
@@ -75,4 +77,3 @@
     </script>
 </body>
 </html>
-
