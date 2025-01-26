@@ -1,1 +1,5 @@
+# Afegir el repositori de Google Chrome
+deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main
+
+# Paquets necessaris
 google-chrome-stable
