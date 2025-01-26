@@ -121,3 +121,4 @@ def extreure_dades_immoble_detall(url):
         "poblacio": poblacio,
         "fotos": fotos,
     }
+
