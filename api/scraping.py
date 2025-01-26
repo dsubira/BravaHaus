@@ -1,9 +1,10 @@
 from bs4 import BeautifulSoup
 import requests
 
+
 def extreure_dades_immobles(url):
     """
-    Extreu dades d'immobles d'una URL d'un portal suportat.
+    Extreu dades d'immobles d'una URL d'un portal suportat (llistats).
     Suporta Fotocasa, Idealista i altres portals amb estructura predefinida.
 
     Args:
@@ -21,24 +22,20 @@ def extreure_dades_immobles(url):
     }
 
     try:
-        # Fer la petició HTTP
         resposta = requests.get(url, headers=headers, timeout=10)
-        resposta.raise_for_status()  # Llança un error si la resposta no és 200 OK
+        resposta.raise_for_status()
     except requests.RequestException as e:
         raise ValueError(f"Error en la petició a la URL: {e}")
 
-    # Comprovar que la resposta és HTML
     if not resposta.headers.get("Content-Type", "").startswith("text/html"):
         raise ValueError(f"La URL no retorna HTML. Content-Type: {resposta.headers.get('Content-Type')}")
 
-    # Analitzar el contingut HTML
     sopa = BeautifulSoup(resposta.text, 'html.parser')
     llistat_immobles = []
 
-    # Funció auxiliar per extreure dades d'un immoble
     def obtenir_immoble(element, adreca_cls, preu_cls, superficie_cls, habitacions_cls):
         """
-        Extreu les dades d'un element HTML d'immoble.
+        Extreu les dades d'un element HTML d'immoble d'un llistat.
 
         Args:
             element: Element HTML que conté dades d'un immoble.
@@ -60,7 +57,6 @@ def extreure_dades_immobles(url):
             habitacions_text = element.find("span", class_=habitacions_cls).text.strip()
             habitacions = int(habitacions_text) if habitacions_text.isdigit() else None
 
-            # Només afegim l'immoble si totes les dades són vàlides
             if adreca and ciutat and preu and superficie and habitacions:
                 return {
                     "adreca": adreca,
@@ -73,7 +69,6 @@ def extreure_dades_immobles(url):
             return None
         return None
 
-    # Processar segons el portal
     if "fotocasa" in url:
         for element in sopa.find_all("div", class_="re-Card-pack"):
             immoble = obtenir_immoble(
@@ -101,16 +96,71 @@ def extreure_dades_immobles(url):
     else:
         raise ValueError("El portal no està suportat actualment.")
 
-    # Retornar la llista d'immobles extrets
     return llistat_immobles
 
 
-if __name__ == "__main__":
-    # Test local amb una URL de prova
-    prova_url = "https://www.fotocasa.es"
+def extreure_dades_immoble_detall(url):
+    """
+    Extreu dades d'un immoble des d'una pàgina de detalls a Fotocasa.
+
+    Args:
+        url (str): URL de la pàgina de l'immoble.
+
+    Returns:
+        dict: Dades extretes de l'immoble.
+
+    Raises:
+        ValueError: Si hi ha errors en la petició o si no es poden extreure dades.
+    """
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
+        "Accept-Language": "ca-ES,ca;q=0.9,en;q=0.8",
+    }
+
     try:
-        immobles = extreure_dades_immobles(prova_url)
-        print(f"Immobles extrets: {immobles}")
+        resposta = requests.get(url, headers=headers, timeout=10)
+        resposta.raise_for_status()
+    except requests.RequestException as e:
+        raise ValueError(f"Error en la petició a la URL: {e}")
+
+    if not resposta.headers.get("Content-Type", "").startswith("text/html"):
+        raise ValueError(f"La URL no retorna HTML. Content-Type: {resposta.headers.get('Content-Type')}")
+
+    sopa = BeautifulSoup(resposta.text, 'html.parser')
+
+    # Extreure dades
+    try:
+        titol = sopa.find("h1", class_="re-DetailHeader-propertyTitle").text.strip()
+        caracteristiques_elements = sopa.find_all("li", class_="re-DetailHeader-features")
+        caracteristiques = [el.text.strip() for el in caracteristiques_elements]
+        tipus = sopa.find("div", class_="re-DetailFeaturesList-featureLabel").text.strip()
+        certificat_energia = sopa.find("div", class_="re-DetailEnergyCertificate-item").text.strip()
+        poblacio = sopa.find("div", class_="re-DetailLocation-area").text.strip()
+    except AttributeError as e:
+        raise ValueError(f"No s'han pogut extreure algunes dades: {e}")
+
+    return {
+        "titol": titol,
+        "caracteristiques": caracteristiques,
+        "tipus": tipus,
+        "certificat_energia": certificat_energia,
+        "poblacio": poblacio,
+    }
+
+
+if __name__ == "__main__":
+    # Proves
+    prova_llistat = "https://www.fotocasa.es"
+    prova_detall = "https://www.fotocasa.es/ca/comprar/vivenda/torroella-de-montgri/terrassa/184301971/d?from=list"
+
+    try:
+        print("Prova llistat:")
+        immobles = extreure_dades_immobles(prova_llistat)
+        print(immobles)
+
+        print("\nProva detall:")
+        immoble = extreure_dades_immoble_detall(prova_detall)
+        print(immoble)
     except ValueError as e:
         print(f"Error: {e}")
 
