@@ -1,124 +1,129 @@
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 import requests
+import time
+
+
+def configurar_driver():
+    """
+    Configura el controlador de Selenium amb opcions adequades.
+    """
+    options = Options()
+    options.add_argument("--headless")  # Executar en mode headless
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
+
+    # Substitueix '/path/to/chromedriver' amb la ruta al teu executable de Chromedriver
+    service = Service("/path/to/chromedriver")
+    driver = webdriver.Chrome(service=service, options=options)
+    return driver
 
 
 def extreure_dades_immobles(url):
     """
     Extreu dades d'immobles d'una URL d'un portal suportat (llistats).
     Suporta Fotocasa.
-
-    Args:
-        url (str): URL del portal immobiliari.
-
-    Returns:
-        list[dict]: Llista d'immobles amb les dades extretes.
-
-    Raises:
-        ValueError: Si hi ha errors en la petició o el portal no està suportat.
     """
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:110.0) Gecko/20100101 Firefox/110.0",
-        "Accept-Language": "ca-ES,ca;q=0.9,en;q=0.8",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Connection": "keep-alive",
-    }
-
+    driver = configurar_driver()
     try:
-        print(f"Processant URL (llistat): {url}")  # Missatge de depuració al terminal
-        resposta = requests.get(url, headers=headers, timeout=10)
-        resposta.raise_for_status()
+        print(f"Processant URL (llistat): {url}")
+        driver.get(url)
+        time.sleep(5)  # Espera a que es carregui el JavaScript
 
-        print("HTML rebut del llistat:")
-        print(resposta.text[:500])  # Mostrem els primers 500 caràcters
+        # Obtenir l'HTML renderitzat
+        html = driver.page_source
 
-    except requests.RequestException as e:
-        raise ValueError(f"Error en la petició a la URL: {e}")
+        # Guardar l'HTML de depuració (opcional)
+        with open("llistat_debug.html", "w", encoding="utf-8") as fitxer:
+            fitxer.write(html)
 
-    if not resposta.headers.get("Content-Type", "").startswith("text/html"):
-        raise ValueError(f"La URL no retorna HTML. Content-Type: {resposta.headers.get('Content-Type')}")
+        sopa = BeautifulSoup(html, 'html.parser')
+        llistat_immobles = []
 
-    sopa = BeautifulSoup(resposta.text, 'html.parser')
-    llistat_immobles = []
+        # Processar immobles del llistat
+        if "fotocasa" in url:
+            for element in sopa.find_all("article", class_="re-Card"):
+                try:
+                    titol = element.find("span", class_="re-Card-title").text.strip()
+                    preu = element.find("span", class_="re-Card-price").text.strip()
+                    caracteristiques = [el.text.strip() for el in element.find_all("li", class_="re-Card-feature")]
+                    fotos = [img["src"] for img in element.find_all("img", class_="re-Card-image")]
 
-    # Processar immobles d'un llistat
-    if "fotocasa" in url:
-        for element in sopa.find_all("article", class_="re-Card"):
-            try:
-                titol = element.find("span", class_="re-Card-title").text.strip()
-                preu = element.find("span", class_="re-Card-price").text.strip()
-                caracteristiques = [el.text.strip() for el in element.find_all("li", class_="re-Card-feature")]
-                fotos = [img["src"] for img in element.find_all("img", class_="re-Card-image")]
+                    immoble = {
+                        "titol": titol,
+                        "preu": preu,
+                        "caracteristiques": caracteristiques,
+                        "fotos": fotos,
+                    }
+                    llistat_immobles.append(immoble)
+                except AttributeError:
+                    continue
 
-                immoble = {
-                    "titol": titol,
-                    "preu": preu,
-                    "caracteristiques": caracteristiques,
-                    "fotos": fotos,
-                }
-                llistat_immobles.append(immoble)
-            except AttributeError:
-                continue
-    else:
-        raise ValueError("El portal no està suportat actualment.")
-
-    return llistat_immobles
+        return llistat_immobles
+    finally:
+        driver.quit()
 
 
 def extreure_dades_immoble_detall(url):
     """
     Extreu dades d'un immoble des d'una pàgina de detalls a Fotocasa.
-
-    Args:
-        url (str): URL de la pàgina de l'immoble.
-
-    Returns:
-        dict: Dades extretes de l'immoble.
-
-    Raises:
-        ValueError: Si hi ha errors en la petició o si no es poden extreure dades.
     """
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:110.0) Gecko/20100101 Firefox/110.0",
-        "Accept-Language": "ca-ES,ca;q=0.9,en;q=0.8",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Connection": "keep-alive",
-    }
+    driver = configurar_driver()
+    try:
+        print(f"Processant URL (detall): {url}")
+        driver.get(url)
+        time.sleep(5)  # Espera a que es carregui el JavaScript
+
+        # Obtenir l'HTML renderitzat
+        html = driver.page_source
+
+        # Guardar l'HTML de depuració (opcional)
+        with open("detall_debug.html", "w", encoding="utf-8") as fitxer:
+            fitxer.write(html)
+
+        sopa = BeautifulSoup(html, 'html.parser')
+
+        try:
+            titol = sopa.find("h1", class_="re-DetailHeader-propertyTitle").text.strip()
+            preu = sopa.find("span", class_="re-DetailHeader-price").text.strip()
+            caracteristiques = [el.text.strip() for el in sopa.find_all("li", class_="re-DetailHeader-features")]
+            tipus = sopa.find("div", class_="re-DetailFeaturesList-featureLabel").text.strip()
+            certificat_energia = sopa.find("div", class_="re-DetailEnergyCertificate-item").text.strip()
+            poblacio = sopa.find("div", class_="re-DetailLocation-area").text.strip()
+            fotos = [img["src"] for img in sopa.find_all("img", class_="re-DetailGallery-image")]
+
+        except AttributeError as e:
+            raise ValueError(f"No s'han pogut extreure algunes dades: {e}")
+
+        return {
+            "titol": titol,
+            "preu": preu,
+            "caracteristiques": caracteristiques,
+            "tipus": tipus,
+            "certificat_energia": certificat_energia,
+            "poblacio": poblacio,
+            "fotos": fotos,
+        }
+    finally:
+        driver.quit()
+
+
+if __name__ == "__main__":
+    # Proves
+    prova_llistat = "https://www.fotocasa.es"
+    prova_detall = "https://www.fotocasa.es/ca/comprar/vivenda/torroella-de-montgri/calefaccio-parking-jardi-terrassa-no-moblat/185192418/d"
 
     try:
-        print(f"Processant URL (detall): {url}")  # Missatge de depuració al terminal
-        resposta = requests.get(url, headers=headers, timeout=10)
-        resposta.raise_for_status()
+        print("Prova llistat:")
+        immobles = extreure_dades_immobles(prova_llistat)
+        print(immobles)
 
-        print("HTML rebut del detall:")
-        print(resposta.text[:500])  # Mostrem els primers 500 caràcters
-
-    except requests.RequestException as e:
-        raise ValueError(f"Error en la petició a la URL: {e}")
-
-    if not resposta.headers.get("Content-Type", "").startswith("text/html"):
-        raise ValueError(f"La URL no retorna HTML. Content-Type: {resposta.headers.get('Content-Type')}")
-
-    sopa = BeautifulSoup(resposta.text, 'html.parser')
-
-    try:
-        titol = sopa.find("h1", class_="re-DetailHeader-propertyTitle").text.strip()
-        preu = sopa.find("span", class_="re-DetailHeader-price").text.strip()
-        caracteristiques = [el.text.strip() for el in sopa.find_all("li", class_="re-DetailHeader-features")]
-        tipus = sopa.find("div", class_="re-DetailFeaturesList-featureLabel").text.strip()
-        certificat_energia = sopa.find("div", class_="re-DetailEnergyCertificate-item").text.strip()
-        poblacio = sopa.find("div", class_="re-DetailLocation-area").text.strip()
-        fotos = [img["src"] for img in sopa.find_all("img", class_="re-DetailGallery-image")]
-
-    except AttributeError as e:
-        raise ValueError(f"No s'han pogut extreure algunes dades: {e}")
-
-    return {
-        "titol": titol,
-        "preu": preu,
-        "caracteristiques": caracteristiques,
-        "tipus": tipus,
-        "certificat_energia": certificat_energia,
-        "poblacio": poblacio,
-        "fotos": fotos,
-    }
-
+        print("\nProva detall:")
+        immoble = extreure_dades_immoble_detall(prova_detall)
+        print(immoble)
+    except ValueError as e:
+        print(f"Error: {e}")
