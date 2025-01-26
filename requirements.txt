@@ -10,3 +10,5 @@ flask-marshmallow
 marshmallow-sqlalchemy
 selenium
 webdriver_manager
+chromedriver-autoinstaller
+google-chrome-stable
