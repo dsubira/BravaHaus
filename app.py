@@ -5,7 +5,7 @@ from flask_marshmallow import Marshmallow
 from dotenv import load_dotenv
 from api.scraping import extreure_dades_immobles, extreure_dades_immoble_detall
 
-# Carregar variables d'entorn...
+# Carregar variables d'entorn....
 load_dotenv()
 
 database_url = os.getenv('DATABASE_URL')
