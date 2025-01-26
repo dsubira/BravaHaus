@@ -55,7 +55,8 @@ def afegir_immoble():
 
 @app.route('/llistat')
 def llistar_immobles():
-    return render_template('llistar_immobles.html')
+    immobles = Immoble.query.all()
+    return render_template('llistar_immobles.html', immobles=immobles)
 
 @app.route('/scraping')
 def scraping():
@@ -162,5 +163,4 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
-
 
