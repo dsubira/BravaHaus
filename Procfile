@@ -1,2 +1,2 @@
-release: ./install-chrome.sh
+release: ./buildpacks/install_chrome.sh
 web: gunicorn app:app
