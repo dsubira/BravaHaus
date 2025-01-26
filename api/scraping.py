@@ -17,8 +17,11 @@ def extreure_dades_immobles(url):
         ValueError: Si hi ha errors en la petició o el portal no està suportat.
     """
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:110.0) Gecko/20100101 Firefox/110.0",
         "Accept-Language": "ca-ES,ca;q=0.9,en;q=0.8",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1"
     }
 
     try:
@@ -71,13 +74,21 @@ def extreure_dades_immoble_detall(url):
         ValueError: Si hi ha errors en la petició o si no es poden extreure dades.
     """
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:110.0) Gecko/20100101 Firefox/110.0",
         "Accept-Language": "ca-ES,ca;q=0.9,en;q=0.8",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1"
     }
 
     try:
         resposta = requests.get(url, headers=headers, timeout=10)
         resposta.raise_for_status()
+
+        # Diagnòstic: guardar l'HTML en un fitxer local
+        with open("pagina.html", "w", encoding="utf-8") as fitxer:
+            fitxer.write(resposta.text)
+
     except requests.RequestException as e:
         raise ValueError(f"Error en la petició a la URL: {e}")
 
@@ -86,6 +97,7 @@ def extreure_dades_immoble_detall(url):
 
     sopa = BeautifulSoup(resposta.text, 'html.parser')
 
+    # Extreure dades de l'immoble
     try:
         titol = sopa.find("h1", class_="re-DetailHeader-propertyTitle").text.strip()
         preu = sopa.find("span", class_="re-DetailHeader-price").text.strip()
@@ -93,7 +105,6 @@ def extreure_dades_immoble_detall(url):
         tipus = sopa.find("div", class_="re-DetailFeaturesList-featureLabel").text.strip()
         certificat_energia = sopa.find("div", class_="re-DetailEnergyCertificate-item").text.strip()
         poblacio = sopa.find("div", class_="re-DetailLocation-area").text.strip()
-        estat = sopa.find("div", class_="re-DetailFeaturesList-item").text.strip()
         fotos = [img["src"] for img in sopa.find_all("img", class_="re-DetailGallery-image")]
 
     except AttributeError as e:
@@ -106,23 +117,17 @@ def extreure_dades_immoble_detall(url):
         "tipus": tipus,
         "certificat_energia": certificat_energia,
         "poblacio": poblacio,
-        "estat": estat,
         "fotos": fotos,
     }
 
 
 if __name__ == "__main__":
-    # Proves
-    prova_llistat = "https://www.fotocasa.es"
-    prova_detall = "https://www.fotocasa.es/ca/comprar/vivenda/torroella-de-montgri/aire-condicionat-no-moblat/185360406/d"
+    prova_url = "https://www.fotocasa.es/ca/comprar/vivenda/torroella-de-montgri/aire-condicionat-no-moblat/185360406/d"
 
     try:
-        print("Prova llistat:")
-        immobles = extreure_dades_immobles(prova_llistat)
-        print(immobles)
-
-        print("\nProva detall:")
-        immoble = extrebre_dades_immoble_detall(prova_detall)
-        print(immoble)
+        dades_immoble = extreure_dades_immoble_detall(prova_url)
+        print("Dades extretes:")
+        print(dades_immoble)
     except ValueError as e:
         print(f"Error: {e}")
+
