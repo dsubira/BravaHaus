@@ -21,10 +21,10 @@
         <section>
             <h1>Scraping d'Immobles</h1>
             <p>Proporciona una URL d'un portal immobiliari per extreure dades automàticament.</p>
-            <form action="/api/scraping" method="post" id="scraping-form">
+            <form id="scraping-form">
                 <label for="url">URL:</label>
                 <input type="url" id="url" name="url" placeholder="Entra la URL aquí" required>
-                <button type="submit" class="btn">Inicia Scraping</button>
+                <button type="submit">Inicia Scraping</button>
             </form>
             <div id="resultat"></div>
         </section>
@@ -50,17 +50,14 @@
 
                 if (resposta.ok) {
                     if (Array.isArray(dades)) {
-                        const immoblesHTML = dades.map(immoble => `
-                            <div>
-                                <h2>${immoble.adreca}</h2>
-                                <p><strong>Ciutat:</strong> ${immoble.ciutat}</p>
-                                <p><strong>Preu:</strong> ${immoble.preu} €</p>
-                            </div>
-                        `).join('');
-
                         document.getElementById('resultat').innerHTML =
-                            `<p style="color:green;">Scraping completat correctament!</p>
-                            ${immoblesHTML}`;
+                            dades.map(immoble => `
+                                <div>
+                                    <h2>${immoble.adreca}</h2>
+                                    <p><strong>Ciutat:</strong> ${immoble.ciutat}</p>
+                                    <p><strong>Preu:</strong> ${immoble.preu} €</p>
+                                </div>
+                            `).join('');
                     } else {
                         document.getElementById('resultat').innerHTML =
                             `<p style="color:red;">Error: Resposta inesperada del servidor.</p>`;
@@ -77,3 +74,4 @@
     </script>
 </body>
 </html>
+
