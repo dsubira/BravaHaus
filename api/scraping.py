@@ -21,12 +21,16 @@ def extreure_dades_immobles(url):
         "Accept-Language": "ca-ES,ca;q=0.9,en;q=0.8",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1"
     }
 
     try:
+        print(f"Processant URL (llistat): {url}")  # Missatge de depuració al terminal
         resposta = requests.get(url, headers=headers, timeout=10)
         resposta.raise_for_status()
+
+        print("HTML rebut del llistat:")
+        print(resposta.text[:500])  # Mostrem els primers 500 caràcters
+
     except requests.RequestException as e:
         raise ValueError(f"Error en la petició a la URL: {e}")
 
@@ -78,16 +82,15 @@ def extreure_dades_immoble_detall(url):
         "Accept-Language": "ca-ES,ca;q=0.9,en;q=0.8",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1"
     }
 
     try:
+        print(f"Processant URL (detall): {url}")  # Missatge de depuració al terminal
         resposta = requests.get(url, headers=headers, timeout=10)
         resposta.raise_for_status()
 
-        # Diagnòstic: guardar l'HTML en un fitxer local
-        with open("pagina.html", "w", encoding="utf-8") as fitxer:
-            fitxer.write(resposta.text)
+        print("HTML rebut del detall:")
+        print(resposta.text[:500])  # Mostrem els primers 500 caràcters
 
     except requests.RequestException as e:
         raise ValueError(f"Error en la petició a la URL: {e}")
@@ -97,7 +100,6 @@ def extreure_dades_immoble_detall(url):
 
     sopa = BeautifulSoup(resposta.text, 'html.parser')
 
-    # Extreure dades de l'immoble
     try:
         titol = sopa.find("h1", class_="re-DetailHeader-propertyTitle").text.strip()
         preu = sopa.find("span", class_="re-DetailHeader-price").text.strip()
@@ -119,15 +121,3 @@ def extreure_dades_immoble_detall(url):
         "poblacio": poblacio,
         "fotos": fotos,
     }
-
-
-if __name__ == "__main__":
-    prova_url = "https://www.fotocasa.es/ca/comprar/vivenda/torroella-de-montgri/aire-condicionat-no-moblat/185360406/d"
-
-    try:
-        dades_immoble = extreure_dades_immoble_detall(prova_url)
-        print("Dades extretes:")
-        print(dades_immoble)
-    except ValueError as e:
-        print(f"Error: {e}")
-
