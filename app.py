@@ -146,5 +146,45 @@ def scraping_immobles():
                     habitacions=dades['habitacions']
                 )
                 db.session.add(nou_immoble)
-           
+            db.session.commit()
+
+            return jsonify({'missatge': 'Dades extretes i afegides correctament'}), 201
+
+    except Exception as e:
+        return jsonify({'error': f"Error durant el scraping: {str(e)}"}), 500
+
+@app.route('/api/immobles/<int:id>', methods=['PUT'])
+def actualitzar_immoble(id):
+    immoble = Immoble.query.get_or_404(id)
+    dades = request.json
+    try:
+        immoble.adreca = dades.get('adreca', immoble.adreca)
+        immoble.ciutat = dades.get('ciutat', immoble.ciutat)
+        immoble.preu = dades.get('preu', immoble.preu)
+        immoble.superficie = dades.get('superficie', immoble.superficie)
+        immoble.habitacions = dades.get('habitacions', immoble.habitacions)
+        immoble.tipus = dades.get('tipus', immoble.tipus)
+        immoble.certificat_energia = dades.get('certificat_energia', immoble.certificat_energia)
+        immoble.titol = dades.get('titol', immoble.titol)
+        immoble.caracteristiques = "; ".join(dades.get('caracteristiques', immoble.caracteristiques.split("; ")))
+
+        db.session.commit()
+        return jsonify(immoble_schema.dump(immoble))
+    except Exception as e:
+        return jsonify({'error': f"Error al actualitzar l'immoble: {str(e)}"}), 400
+
+@app.route('/api/immobles/<int:id>', methods=['DELETE'])
+def eliminar_immoble(id):
+    immoble = Immoble.query.get_or_404(id)
+    try:
+        db.session.delete(immoble)
+        db.session.commit()
+        return '', 204
+    except Exception as e:
+        return jsonify({'error': f"Error al eliminar l'immoble: {str(e)}"}), 400
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
 
