@@ -9,3 +9,4 @@ python-dotenv
 flask-marshmallow
 marshmallow-sqlalchemy
 selenium
+webdriver_manager
