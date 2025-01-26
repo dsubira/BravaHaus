@@ -2,13 +2,13 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
+import requests
 import time
 
 
 def configurar_driver():
     """
-    Configura el controlador de Selenium amb WebDriver Manager.
+    Configura el controlador de Selenium amb opcions adequades.
     """
     options = Options()
     options.add_argument("--headless")  # Executar en mode headless
@@ -17,8 +17,8 @@ def configurar_driver():
     options.add_argument("--disable-gpu")
     options.add_argument("--window-size=1920,1080")
 
-    # Utilitza WebDriver Manager per descarregar i configurar ChromeDriver
-    service = Service(ChromeDriverManager().install())
+    # Substitueix '/path/to/chromedriver' amb la ruta al teu executable de Chromedriver
+    service = Service("/path/to/chromedriver")
     driver = webdriver.Chrome(service=service, options=options)
     return driver
 
@@ -50,9 +50,7 @@ def extreure_dades_immobles(url):
                 try:
                     titol = element.find("span", class_="re-Card-title").text.strip()
                     preu = element.find("span", class_="re-Card-price").text.strip()
-                    caracteristiques = [
-                        el.text.strip() for el in element.find_all("li", class_="re-Card-feature")
-                    ]
+                    caracteristiques = [el.text.strip() for el in element.find_all("li", class_="re-Card-feature")]
                     fotos = [img["src"] for img in element.find_all("img", class_="re-Card-image")]
 
                     immoble = {
@@ -63,7 +61,6 @@ def extreure_dades_immobles(url):
                     }
                     llistat_immobles.append(immoble)
                 except AttributeError:
-                    print("Error en extreure dades d'un immoble. Continuant...")
                     continue
 
         return llistat_immobles
@@ -90,30 +87,27 @@ def extreure_dades_immoble_detall(url):
 
         sopa = BeautifulSoup(html, 'html.parser')
 
-        # Extreure dades
         try:
             titol = sopa.find("h1", class_="re-DetailHeader-propertyTitle").text.strip()
             preu = sopa.find("span", class_="re-DetailHeader-price").text.strip()
-            caracteristiques = [
-                el.text.strip() for el in sopa.find_all("li", class_="re-DetailHeader-features")
-            ]
+            caracteristiques = [el.text.strip() for el in sopa.find_all("li", class_="re-DetailHeader-features")]
             tipus = sopa.find("div", class_="re-DetailFeaturesList-featureLabel").text.strip()
             certificat_energia = sopa.find("div", class_="re-DetailEnergyCertificate-item").text.strip()
             poblacio = sopa.find("div", class_="re-DetailLocation-area").text.strip()
             fotos = [img["src"] for img in sopa.find_all("img", class_="re-DetailGallery-image")]
 
-            return {
-                "titol": titol,
-                "preu": preu,
-                "caracteristiques": caracteristiques,
-                "tipus": tipus,
-                "certificat_energia": certificat_energia,
-                "poblacio": poblacio,
-                "fotos": fotos,
-            }
         except AttributeError as e:
             raise ValueError(f"No s'han pogut extreure algunes dades: {e}")
 
+        return {
+            "titol": titol,
+            "preu": preu,
+            "caracteristiques": caracteristiques,
+            "tipus": tipus,
+            "certificat_energia": certificat_energia,
+            "poblacio": poblacio,
+            "fotos": fotos,
+        }
     finally:
         driver.quit()
 
