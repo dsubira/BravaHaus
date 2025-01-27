@@ -9,8 +9,8 @@ from bs4 import BeautifulSoup
 os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/app/.cache/ms-playwright"
 
 # Verifica si els navegadors estan instal·lats, i si no, descarrega'ls
-if not os.path.exists("/app/.cache/ms-playwright/chromium"):
-    subprocess.run(["playwright", "install", "chromium"], check=True)
+#if not os.path.exists("/app/.cache/ms-playwright/chromium"):
+#    subprocess.run(["playwright", "install", "chromium"], check=True)
 
 
 async def configurar_driver():
