@@ -1,4 +1,3 @@
-
-# Paquets necessaris
-
-
+libx11-xcb1
+libxcursor1
+libgtk-3-0
