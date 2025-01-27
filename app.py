@@ -1,13 +1,15 @@
 import os
+import asyncio
 from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from dotenv import load_dotenv
 from api.scraping import extreure_dades_immobles, extreure_dades_immoble_detall
 
-# Carregar variables d'entorn.....
+# Carregar variables d'entorn
 load_dotenv()
 
+# Configurar la base de dades
 database_url = os.getenv('DATABASE_URL')
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://")
@@ -22,7 +24,7 @@ ma = Marshmallow(app)
 # Model de la base de dades
 class Immoble(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    adreca = db.Column(db.String(200), nullable=True)  # Opcional per suportar més formats
+    adreca = db.Column(db.String(200), nullable=True)
     ciutat = db.Column(db.String(100), nullable=True)
     preu = db.Column(db.Float, nullable=True)
     superficie = db.Column(db.Float, nullable=True)
@@ -35,10 +37,10 @@ class Immoble(db.Model):
     informacio_urbanistica = db.Column(db.Text, nullable=True)
     latitud = db.Column(db.Float, nullable=True)
     longitud = db.Column(db.Float, nullable=True)
-    tipus = db.Column(db.String(100), nullable=True)  # Tipus d'immoble
-    certificat_energia = db.Column(db.String(10), nullable=True)  # Certificació energètica
-    titol = db.Column(db.String(200), nullable=True)  # Títol de l'immoble
-    caracteristiques = db.Column(db.Text, nullable=True)  # Característiques en text
+    tipus = db.Column(db.String(100), nullable=True)
+    certificat_energia = db.Column(db.String(10), nullable=True)
+    titol = db.Column(db.String(200), nullable=True)
+    caracteristiques = db.Column(db.Text, nullable=True)
 
 # Serializer
 class ImmobleSchema(ma.SQLAlchemyAutoSchema):
@@ -113,17 +115,18 @@ def scraping_immobles():
         return jsonify({'error': 'Cal proporcionar una URL'}), 400
 
     try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
         if "fotocasa" in url and "/d?" in url:
-            # Processar pàgina de detall d'un immoble
-            dades_immoble = extreure_dades_immoble_detall(url)
+            dades_immoble = loop.run_until_complete(extreure_dades_immoble_detall(url))
             if not dades_immoble:
                 return jsonify({'error': 'No s\'han pogut extreure dades de la URL proporcionada.'}), 404
 
             nou_immoble = Immoble(
                 titol=dades_immoble.get('titol'),
-                ciutat=dades_immoble.get('poblacio'),
-                tipus=dades_immoble.get('tipus'),
-                certificat_energia=dades_immoble.get('certificat_energia'),
+                ciutat=dades_immoble.get('ubicacio'),
+                preu=dades_immoble.get('preu'),
                 caracteristiques="; ".join(dades_immoble.get('caracteristiques', []))
             )
             db.session.add(nou_immoble)
@@ -132,18 +135,16 @@ def scraping_immobles():
             return jsonify({'missatge': 'Dades extretes i afegides correctament', 'immoble': immoble_schema.dump(nou_immoble)}), 201
 
         else:
-            # Processar pàgina de llistat
-            dades_immobles = extreure_dades_immobles(url)
+            dades_immobles = loop.run_until_complete(extreure_dades_immobles(url))
             if not dades_immobles:
                 return jsonify({'error': 'No s\'han trobat immobles a la URL proporcionada.'}), 404
 
             for dades in dades_immobles:
                 nou_immoble = Immoble(
-                    adreca=dades['adreca'],
-                    ciutat=dades['ciutat'],
-                    preu=dades['preu'],
-                    superficie=dades['superficie'],
-                    habitacions=dades['habitacions']
+                    titol=dades['titol'],
+                    ciutat=dades.get('ubicacio', ''),
+                    preu=dades.get('preu', 0),
+                    caracteristiques="; ".join(dades.get('caracteristiques', []))
                 )
                 db.session.add(nou_immoble)
             db.session.commit()
