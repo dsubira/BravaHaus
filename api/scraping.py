@@ -5,6 +5,10 @@ import subprocess
 
 # Descarrega els navegadors necessaris abans de començar
 subprocess.run(["playwright", "install", "chromium"], check=True)
+import os
+
+# Configura el camí perquè Playwright trobi els navegadors descarregats
+os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/app/.cache/ms-playwright"
 
 
 async def configurar_driver():
