@@ -8,4 +8,5 @@ geopy
 python-dotenv
 flask-marshmallow
 marshmallow-sqlalchemy
-playwright
+playwright install chromium
+
