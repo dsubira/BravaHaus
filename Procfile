@@ -1,2 +1,2 @@
-release: ./buildpacks/install_chrome.sh
+release: playwright install
 web: gunicorn app:app
