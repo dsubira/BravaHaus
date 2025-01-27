@@ -1,6 +1,11 @@
 import asyncio
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
+import subprocess
+
+# Descarrega els navegadors necessaris abans de començar
+subprocess.run(["playwright", "install", "chromium"], check=True)
+
 
 async def configurar_driver():
     """
