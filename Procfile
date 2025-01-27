@@ -1,3 +1,2 @@
-release: playwright install
+release: pip install playwright --no-cache-dir --ignore-installed && playwright install chromium
 web: gunicorn app:app
-playwright install chromium
