@@ -16,7 +16,6 @@ libglib2.0-0
 # Dependències requerides per Playwright
 libgstreamer1.0-0
 libwoff1
-libwoff2common1
 libwoff2dec1
 libflite1
 flite1-dev
