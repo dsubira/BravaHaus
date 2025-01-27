@@ -10,3 +10,5 @@ libxshmfence1
 libxtst6
 libpangocairo-1.0-0
 libgtk-3-0
+libgbm-dev
+libglib2.0-0
