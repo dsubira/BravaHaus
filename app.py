@@ -9,7 +9,7 @@ from api.scraping import extreure_dades_immobles, extreure_dades_immoble_detall
 # Carregar variables d'entorn
 load_dotenv()
 
-# Configurar la base de dades..
+# Configurar la base de dades...
 database_url = os.getenv('DATABASE_URL')
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://")
