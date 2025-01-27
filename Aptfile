@@ -25,3 +25,5 @@ libgstreamer-plugins-good1.0-0
 libgstpbutils-1.0-0
 libglib2.0-0
 libsecret-1-dev
+libwoff2common0
+libwoff2dec0
