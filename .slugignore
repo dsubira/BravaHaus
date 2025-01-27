@@ -1,10 +1,8 @@
+# Ignorem arxius innecessaris
 *.log
-*.sqlite3
 __pycache__/
-*.pyc
-*.pyo
+.git/
 node_modules/
 tests/
 .env
-.vscode/
 .DS_Store
