@@ -128,10 +128,14 @@ class ScraperIdealista:
                     dades["longitud"] = float(lon)
                     dades["ubicacio_g"] = f"SRID=4326;POINT({lon} {lat})"
                 except (KeyError, ValueError):
-                    pass
+                    dades["ubicacio_g"] = "SRID=4326;POINT(0 0)"  # Valor per defecte
+
+            # Si ubicacio_g continua sent None, s'assigna un valor predeterminat.
+            if dades.get("ubicacio_g") is None:
+                dades["ubicacio_g"] = "SRID=4326;POINT(0 0)"
 
             # Mostrem les dades capturades per depurar
-            print("\n=== Dades extretes pel scraper ===")
+            print("\n=== Dades extretes pel scraper abans d'inserir a la BD ===")
             for clau, valor in dades.items():
                 print(f"{clau}: {valor}")
 
@@ -141,9 +145,7 @@ class ScraperIdealista:
             # Mostrem l'error i les dades capturades en cas de fallada
             print("\n=== Error durant el scraping ===")
             print(f"Error: {e}")
+            print("Dades extretes fins al moment (si n'hi ha):")
+            for clau, valor in locals().get('dades', {}).items():
+                print(f"{clau}: {valor}")
             return None
-
-
-
-
-
