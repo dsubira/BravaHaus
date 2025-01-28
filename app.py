@@ -23,6 +23,8 @@ ma = Marshmallow(app)
 
 # Models de la base de dades
 class Immoble(db.Model):
+    __tablename__ = 'immobles'  # Indica explícitament el nom de la taula
+
     id = db.Column(db.Integer, primary_key=True)
     titol = db.Column(db.String(200), nullable=True)
     adreca = db.Column(db.String(200), nullable=True)
@@ -40,10 +42,10 @@ class Immoble(db.Model):
     parking = db.Column(db.Boolean, default=False)
     descripcio = db.Column(db.Text, nullable=True)
     ubicacio = db.Column(db.String(500), nullable=True)
-    ubicacio_g = db.Column(db.String(500), nullable=True)  # Coordenades
+    ubicacio_g = db.Column(db.String(500), nullable=True)
     latitud = db.Column(db.Float, nullable=True)
     longitud = db.Column(db.Float, nullable=True)
-    portal = db.Column(db.String(50), nullable=True)
+    portal = db.Column(db.String(50), nullable=False)
     link = db.Column(db.String(500), nullable=True)
 
 # Serializer
@@ -62,7 +64,7 @@ def create_or_update_immoble(dades, portal, immoble=None):
     if immoble is None:
         immoble = Immoble()
 
-    immoble.titol = dades.get('titol', immoble.titol)
+    immoble.titol = dades.get('títol', immoble.titol)
     immoble.adreca = dades.get('adreca', immoble.adreca)
     immoble.ciutat = dades.get('ciutat', immoble.ciutat)
     immoble.preu = dades.get('preu', immoble.preu)
@@ -70,20 +72,22 @@ def create_or_update_immoble(dades, portal, immoble=None):
     immoble.habitacions = dades.get('habitacions', immoble.habitacions)
     immoble.banys = dades.get('banys', immoble.banys)
     immoble.estat_conservacio = dades.get('estat_conservacio', immoble.estat_conservacio)
-    immoble.caracteristiques = "; ".join(dades.get('caracteristiques', "").split("; ")) if dades.get('caracteristiques') else immoble.caracteristiques
+    immoble.caracteristiques = "; ".join(
+        dades.get('caracteristiques', "").split("; ")
+        if dades.get('caracteristiques') else []
+    )
     immoble.certificat_energia = dades.get('certificat_energia', immoble.certificat_energia)
     immoble.terrassa = dades.get('terrassa', immoble.terrassa) == "Sí"
     immoble.piscina = dades.get('piscina', immoble.piscina) == "Sí"
     immoble.aire_condicionat = dades.get('aire_condicionat', immoble.aire_condicionat) == "Sí"
     immoble.parking = dades.get('parking', immoble.parking) == "Inclòs"
     immoble.descripcio = dades.get('descripcio', immoble.descripcio)
-    immoble.portal = portal
     immoble.ubicacio = dades.get('ubicacio', immoble.ubicacio)
     immoble.latitud = dades.get('latitud', immoble.latitud)
     immoble.longitud = dades.get('longitud', immoble.longitud)
+    immoble.ubicacio_g = dades.get('ubicacio_g', immoble.ubicacio_g)
+    immoble.portal = portal
     immoble.link = dades.get('link', immoble.link)
-    immoble.ubicacio_g = f"POINT({immoble.longitud} {immoble.latitud})" if immoble.latitud and immoble.longitud else immoble.ubicacio_g
-
     return immoble
 
 # Rutes HTML
@@ -176,5 +180,6 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
 
 
