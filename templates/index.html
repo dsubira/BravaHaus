@@ -4,10 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Gestió d'immobles amb BravaHaus">
-    <meta name="keywords" content="immobles, llistat, gestió, immobiliària">
     <title>BravaHaus</title>
-    <link rel="stylesheet" href="/static/css/estils.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estils.css') }}">
 </head>
 
 <body>
@@ -16,10 +14,10 @@
             <h1>BravaHaus</h1>
             <nav>
                 <ul>
-                    <li><a href="/">Inici</a></li>
-                    <li><a href="/afegir">Afegeix un immoble</a></li>
-                    <li><a href="/llistat">Consulta els immobles</a></li>
-                    <li><a href="/scraping">Scraping</a></li>
+                    <li><a href="{{ url_for('index') }}">Inici</a></li>
+                    <li><a href="{{ url_for('afegir_immoble') }}">Afegeix un immoble</a></li>
+                    <li><a href="{{ url_for('llistar_immobles') }}">Consulta els immobles</a></li>
+                    <li><a href="{{ url_for('scraping') }}">Scraping</a></li>
                 </ul>
             </nav>
         </div>
@@ -27,20 +25,29 @@
 
     <main>
         <section id="property-list">
-            {% for immoble in immobles %}
             <div class="property-card">
-                <img src="{{ immoble.fotos.split(',')[0] if immoble.fotos else '/static/images/default.jpg' }}" 
-                     alt="Imatge de {{ immoble.titol }}">
+                <img src="{{ url_for('static', filename='images/property1.avif') }}" alt="Imatge de la propietat">
                 <div class="property-details">
-                    <h2>{{ immoble.titol }}</h2>
-                    <p><span class="icon">📍</span> {{ immoble.ciutat }}</p>
-                    <p><span class="icon">💰</span> {{ immoble.preu }} €</p>
-                    <p><span class="icon">🏠</span> {{ immoble.superficie }} m²</p>
-                    <p><span class="icon">🛏️</span> {{ immoble.habitacions }} | <span class="icon">🛁</span> {{ immoble.banys }}</p>
+                    <h2>Apartament modern</h2>
+                    <p><span class="icon">📍</span> Ubicació: Barcelona</p>
+                    <p><span class="icon">💰</span> Preu: 250.000 €</p>
+                    <p><span class="icon">🏠</span> Superfície: 80m²</p>
+                    <p><span class="icon">🛏️</span> Habitacions: 2 | <span class="icon">🛁</span> Banys: 1</p>
                 </div>
-                <a href="/detalls/{{ immoble.id }}"><button>Veure detalls</button></a>
+                <button>Veure detalls</button>
             </div>
-            {% endfor %}
+
+            <div class="property-card">
+                <img src="{{ url_for('static', filename='images/property2.avif') }}" alt="Imatge de la propietat">
+                <div class="property-details">
+                    <h2>Estudi acollidor</h2>
+                    <p><span class="icon">📍</span> Ubicació: Girona</p>
+                    <p><span class="icon">💰</span> Preu: 120.000 €</p>
+                    <p><span class="icon">🏠</span> Superfície: 50m²</p>
+                    <p><span class="icon">🛏️</span> Habitacions: 1 | <span class="icon">🛁</span> Banys: 1</p>
+                </div>
+                <button>Veure detalls</button>
+            </div>
         </section>
     </main>
 
@@ -52,3 +59,4 @@
 </body>
 
 </html>
+
