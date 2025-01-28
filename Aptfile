@@ -10,17 +10,4 @@ libxshmfence1
 libxtst6
 libpangocairo-1.0-0
 libgtk-3-0
-libgbm-dev
 libglib2.0-0
-
-# Dependències requerides per Playwright
-libgstreamer1.0-0
-libwoff1
-libwoff2dec1
-libflite1
-flite1-dev
-libgstreamer-plugins-base1.0-0
-libgstreamer-plugins-good1.0-0
-libgstpbutils-1.0-0
-libglib2.0-0
-libsecret-1-dev
