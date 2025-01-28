@@ -62,21 +62,23 @@
                 const dades = await resposta.json();
 
                 if (resposta.ok) {
-                    const portal = url.includes("idealista") ? "Idealista" : "Desconegut";
                     resultatDiv.innerHTML = `
                         <h2>Resultat del Scraping</h2>
-                        <p><strong>Portal detectat:</strong> ${portal}</p>
                         <h3>Dades extretes:</h3>
                         <ul>
                             <li><strong>Títol:</strong> ${dades.immoble.titol || 'No disponible'}</li>
-                            <li><strong>Preu:</strong> ${dades.immoble.preu || 'No disponible'} €</li>
+                            <li><strong>Preu:</strong> ${dades.immoble.preu ? dades.immoble.preu + ' €' : 'No disponible'}</li>
                             <li><strong>Adreça:</strong> ${dades.immoble.adreca || 'No disponible'}</li>
                             <li><strong>Ciutat:</strong> ${dades.immoble.ciutat || 'No disponible'}</li>
-                            <li><strong>Superfície:</strong> ${dades.immoble.superficie || 'No disponible'} m²</li>
+                            <li><strong>Superfície:</strong> ${dades.immoble.superficie ? dades.immoble.superficie + ' m²' : 'No disponible'}</li>
                             <li><strong>Habitacions:</strong> ${dades.immoble.habitacions || 'No disponible'}</li>
                             <li><strong>Banys:</strong> ${dades.immoble.banys || 'No disponible'}</li>
                             <li><strong>Terrassa:</strong> ${dades.immoble.terrassa ? 'Sí' : 'No'}</li>
                             <li><strong>Piscina:</strong> ${dades.immoble.piscina ? 'Sí' : 'No'}</li>
+                            <li><strong>Aire Condicionat:</strong> ${dades.immoble.aire_condicionat ? 'Sí' : 'No'}</li>
+                            <li><strong>Parking:</strong> ${dades.immoble.parking ? 'Sí' : 'No'}</li>
+                            <li><strong>Certificat Energètic:</strong> ${dades.immoble.certificat_energia || 'No disponible'}</li>
+                            <li><strong>Descripció:</strong> ${dades.immoble.descripcio || 'No disponible'}</li>
                         </ul>
                     `;
                 } else {
@@ -95,3 +97,4 @@
     </script>
 </body>
 </html>
+
