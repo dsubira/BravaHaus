@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Afegir Immoble</title>
-    <link rel="stylesheet" href="/static/estils.css">
+    <link rel="stylesheet" href="/static/css/estils.css">
 </head>
 <body>
     <header>
@@ -12,6 +12,9 @@
     </header>
     <main>
         <form action="/api/immobles" method="POST">
+            <label for="titol">Títol:</label>
+            <input type="text" id="titol" name="titol" required>
+
             <label for="adreca">Adreça:</label>
             <input type="text" id="adreca" name="adreca" required>
 
@@ -27,29 +30,44 @@
             <label for="habitacions">Habitacions:</label>
             <input type="number" id="habitacions" name="habitacions" required>
 
-            <label for="estat_reforma">Estat de reforma:</label>
-            <input type="text" id="estat_reforma" name="estat_reforma">
+            <label for="banys">Banys:</label>
+            <input type="number" id="banys" name="banys" required>
+
+            <label for="estat_conservacio">Estat Conservació:</label>
+            <input type="text" id="estat_conservacio" name="estat_conservacio">
 
             <label for="fotos">Fotos (URLs separades per comes):</label>
             <input type="text" id="fotos" name="fotos">
 
-            <label for="cost_reforma_estim">Cost estimat de la reforma:</label>
-            <input type="number" id="cost_reforma_estim" name="cost_reforma_estim" step="0.01">
+            <label for="terrassa">Terrassa:</label>
+            <select id="terrassa" name="terrassa">
+                <option value="true">Sí</option>
+                <option value="false" selected>No</option>
+            </select>
 
-            <label for="preu_objectiu">Preu objectiu:</label>
-            <input type="number" id="preu_objectiu" name="preu_objectiu" step="0.01">
+            <label for="piscina">Piscina:</label>
+            <select id="piscina" name="piscina">
+                <option value="true">Sí</option>
+                <option value="false" selected>No</option>
+            </select>
 
-            <label for="estat_ocupacional">Estat ocupacional:</label>
-            <input type="text" id="estat_ocupacional" name="estat_ocupacional">
+            <label for="aire_condicionat">Aire Condicionat:</label>
+            <select id="aire_condicionat" name="aire_condicionat">
+                <option value="true">Sí</option>
+                <option value="false" selected>No</option>
+            </select>
 
-            <label for="informacio_urbanistica">Informació urbanística:</label>
-            <textarea id="informacio_urbanistica" name="informacio_urbanistica"></textarea>
+            <label for="parking">Pàrking:</label>
+            <select id="parking" name="parking">
+                <option value="true">Inclòs</option>
+                <option value="false" selected>No inclòs</option>
+            </select>
 
-            <label for="latitud">Latitud:</label>
-            <input type="number" id="latitud" name="latitud" step="0.000001">
+            <label for="descripcio">Descripció:</label>
+            <textarea id="descripcio" name="descripcio"></textarea>
 
-            <label for="longitud">Longitud:</label>
-            <input type="number" id="longitud" name="longitud" step="0.000001">
+            <label for="certificat_energia">Certificat d'Energia:</label>
+            <input type="text" id="certificat_energia" name="certificat_energia">
 
             <button type="submit">Afegir Immoble</button>
         </form>
@@ -59,5 +77,6 @@
     </footer>
 </body>
 </html>
+
 
 
