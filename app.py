@@ -26,9 +26,9 @@ class Immoble(db.Model):
     __tablename__ = 'immobles'  # Indica explícitament el nom de la taula
 
     id = db.Column(db.Integer, primary_key=True)
-    titol = db.Column(db.String(200), nullable=True)
-    adreca = db.Column(db.String(200), nullable=True)
-    ciutat = db.Column(db.String(100), nullable=True)
+    titol = db.Column(db.String(255), nullable=True)
+    adreca = db.Column(db.String(255), nullable=True)
+    poblacio = db.Column(db.String(100), nullable=True)  # Canviat de ciutat a poblacio
     preu = db.Column(db.Float, nullable=True)
     superficie = db.Column(db.Float, nullable=True)
     habitacions = db.Column(db.Integer, nullable=True)
@@ -66,7 +66,7 @@ def create_or_update_immoble(dades, portal, immoble=None):
 
     immoble.titol = dades.get('títol', immoble.titol)
     immoble.adreca = dades.get('adreca', immoble.adreca)
-    immoble.ciutat = dades.get('ciutat', immoble.ciutat)
+    immoble.poblacio = dades.get('poblacio', immoble.poblacio)  # Actualitzat
     immoble.preu = dades.get('preu', immoble.preu)
     immoble.superficie = dades.get('superficie_construida', immoble.superficie)
     immoble.habitacions = dades.get('habitacions', immoble.habitacions)
@@ -180,6 +180,4 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
-
-
 
