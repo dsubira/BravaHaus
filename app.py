@@ -67,7 +67,7 @@ def create_or_update_immoble(dades, portal, immoble=None):
     immoble.habitacions = dades.get('habitacions', immoble.habitacions)
     immoble.banys = dades.get('banys', immoble.banys)
     immoble.estat_conservacio = dades.get('estat_conservacio', immoble.estat_conservacio)
-    immoble.caracteristiques = "; ".join(dades.get('caracteristiques', immoble.caracteristiques.split("; ")))
+    immoble.caracteristiques = "; ".join(dades.get('caracteristiques', []).split("; "))
     immoble.certificat_energia = dades.get('certificat_energia', immoble.certificat_energia)
     immoble.terrassa = dades.get('terrassa', immoble.terrassa) == "Sí"
     immoble.piscina = dades.get('piscina', immoble.piscina) == "Sí"
@@ -92,7 +92,7 @@ def llistar_immobles():
     return render_template('llistar_immobles.html', immobles=immobles)
 
 @app.route('/scraping')
-def scraping():
+def scraping_page():
     return render_template('scraping.html')
 
 @app.route('/detalls/<int:immoble_id>')
@@ -167,4 +167,5 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
 
