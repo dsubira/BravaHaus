@@ -1,11 +1,24 @@
+# Flask i extensions
 flask
 flask-sqlalchemy
-gunicorn
+flask-marshmallow
+
+# ORM i serialització
+marshmallow-sqlalchemy
+
+# Base de dades
 psycopg2-binary
+
+# Scraping
 beautifulsoup4
 requests
-geopy
-python-dotenv
-flask-marshmallow
-marshmallow-sqlalchemy
 playwright
+
+# Geolocalització
+geopy
+
+# Entorn i configuració
+python-dotenv
+
+# Deploy
+gunicorn
