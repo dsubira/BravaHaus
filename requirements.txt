@@ -3,7 +3,7 @@ flask
 flask-sqlalchemy
 flask-marshmallow
 
-# ORM i serialització
+# Serialització
 marshmallow-sqlalchemy
 
 # Base de dades
@@ -14,11 +14,9 @@ beautifulsoup4
 requests
 playwright
 
-# Geolocalització
-geopy
-
-# Entorn i configuració
+# Entorn
 python-dotenv
 
-# Deploy
+# Altres
+geopy
 gunicorn
