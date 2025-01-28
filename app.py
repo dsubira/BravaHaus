@@ -4,12 +4,15 @@ from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from dotenv import load_dotenv
-from api.scraping import extreure_dades_immobles, extreure_dades_immoble_detall
+from api.scraping_idealista import ScraperIdealista
+# Si hi ha altres portals:
+# from api.scraping_fotocasa import ScraperFotocasa
+# from api.scraping_habitaclia import ScraperHabitaclia
 
 # Carregar variables d'entorn
 load_dotenv()
 
-# Configurar la base de dades........
+# Configurar l'aplicació
 database_url = os.getenv('DATABASE_URL')
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://")
@@ -18,29 +21,31 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Inicialitzar extensions
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
-# Model de la base de dades
+# Models de la base de dades
 class Immoble(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    titol = db.Column(db.String(200), nullable=True)
     adreca = db.Column(db.String(200), nullable=True)
     ciutat = db.Column(db.String(100), nullable=True)
     preu = db.Column(db.Float, nullable=True)
     superficie = db.Column(db.Float, nullable=True)
     habitacions = db.Column(db.Integer, nullable=True)
-    estat_reforma = db.Column(db.String(100), nullable=True)
-    fotos = db.Column(db.Text, nullable=True)  # URLs separades per comes
-    cost_reforma_estim = db.Column(db.Float, nullable=True)
-    preu_objectiu = db.Column(db.Float, nullable=True)
-    estat_ocupacional = db.Column(db.String(100), nullable=True)
-    informacio_urbanistica = db.Column(db.Text, nullable=True)
+    banys = db.Column(db.Integer, nullable=True)
+    estat_conservacio = db.Column(db.String(100), nullable=True)
+    caracteristiques = db.Column(db.Text, nullable=True)
+    certificat_energia = db.Column(db.String(20), nullable=True)
+    terrassa = db.Column(db.Boolean, default=False)
+    piscina = db.Column(db.Boolean, default=False)
+    aire_condicionat = db.Column(db.Boolean, default=False)
+    parking = db.Column(db.Boolean, default=False)
+    descripcio = db.Column(db.Text, nullable=True)
     latitud = db.Column(db.Float, nullable=True)
     longitud = db.Column(db.Float, nullable=True)
-    tipus = db.Column(db.String(100), nullable=True)
-    certificat_energia = db.Column(db.String(10), nullable=True)
-    titol = db.Column(db.String(200), nullable=True)
-    caracteristiques = db.Column(db.Text, nullable=True)
+    portal = db.Column(db.String(50), nullable=False)  # Idealista, Fotocasa, etc.
 
 # Serializer
 class ImmobleSchema(ma.SQLAlchemyAutoSchema):
@@ -49,6 +54,32 @@ class ImmobleSchema(ma.SQLAlchemyAutoSchema):
 
 immoble_schema = ImmobleSchema()
 immobles_schema = ImmobleSchema(many=True)
+
+# Helpers
+def create_or_update_immoble(dades, portal, immoble=None):
+    """
+    Crea o actualitza un objecte Immoble amb les dades proporcionades.
+    """
+    if immoble is None:
+        immoble = Immoble()
+
+    immoble.titol = dades.get('títol', immoble.titol)
+    immoble.adreca = dades.get('adreca', immoble.adreca)
+    immoble.ciutat = dades.get('ciutat', immoble.ciutat)
+    immoble.preu = dades.get('preu', immoble.preu)
+    immoble.superficie = dades.get('superficie_construida', immoble.superficie)
+    immoble.habitacions = dades.get('habitacions', immoble.habitacions)
+    immoble.banys = dades.get('banys', immoble.banys)
+    immoble.estat_conservacio = dades.get('estat_conservacio', immoble.estat_conservacio)
+    immoble.caracteristiques = "; ".join(dades.get('caracteristiques', immoble.caracteristiques.split("; ")))
+    immoble.certificat_energia = dades.get('certificat_energia', immoble.certificat_energia)
+    immoble.terrassa = dades.get('terrassa', immoble.terrassa) == "Sí"
+    immoble.piscina = dades.get('piscina', immoble.piscina) == "Sí"
+    immoble.aire_condicionat = dades.get('aire_condicionat', immoble.aire_condicionat) == "Sí"
+    immoble.parking = dades.get('parking', immoble.parking) == "Inclòs"
+    immoble.descripcio = dades.get('descripcio', immoble.descripcio)
+    immoble.portal = portal
+    return immoble
 
 # Rutes principals
 @app.route('/')
@@ -83,25 +114,7 @@ def obtenir_immoble(id):
 def afegir_immoble_api():
     dades = request.json
     try:
-        nou_immoble = Immoble(
-            adreca=dades.get('adreca'),
-            ciutat=dades.get('ciutat'),
-            preu=dades.get('preu'),
-            superficie=dades.get('superficie'),
-            habitacions=dades.get('habitacions'),
-            estat_reforma=dades.get('estat_reforma'),
-            fotos=dades.get('fotos'),
-            cost_reforma_estim=dades.get('cost_reforma_estim'),
-            preu_objectiu=dades.get('preu_objectiu'),
-            estat_ocupacional=dades.get('estat_ocupacional'),
-            informacio_urbanistica=dades.get('informacio_urbanistica'),
-            latitud=dades.get('latitud'),
-            longitud=dades.get('longitud'),
-            tipus=dades.get('tipus'),
-            certificat_energia=dades.get('certificat_energia'),
-            titol=dades.get('titol'),
-            caracteristiques="; ".join(dades.get('caracteristiques', []))
-        )
+        nou_immoble = create_or_update_immoble(dades, portal="Manual")
         db.session.add(nou_immoble)
         db.session.commit()
         return jsonify(immoble_schema.dump(nou_immoble)), 201
@@ -111,46 +124,30 @@ def afegir_immoble_api():
 @app.route('/api/scraping', methods=['POST'])
 def scraping_immobles():
     url = request.json.get('url')
-    if not url:
-        return jsonify({'error': 'Cal proporcionar una URL'}), 400
+    portal = request.json.get('portal')  # Especificar el portal (idealista, fotocasa, etc.)
+    if not url or not portal:
+        return jsonify({'error': 'Cal proporcionar una URL i un portal'}), 400
 
     try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        if "fotocasa" in url and "/d?" in url:
-            dades_immoble = loop.run_until_complete(extreure_dades_immoble_detall(url))
-            if not dades_immoble:
-                return jsonify({'error': 'No s\'han pogut extreure dades de la URL proporcionada.'}), 404
-
-            nou_immoble = Immoble(
-                titol=dades_immoble.get('titol'),
-                ciutat=dades_immoble.get('ubicacio'),
-                preu=dades_immoble.get('preu'),
-                caracteristiques="; ".join(dades_immoble.get('caracteristiques', []))
-            )
-            db.session.add(nou_immoble)
-            db.session.commit()
-
-            return jsonify({'missatge': 'Dades extretes i afegides correctament', 'immoble': immoble_schema.dump(nou_immoble)}), 201
-
+        # Seleccionar el scraper segons el portal
+        if portal.lower() == 'idealista':
+            scraper = ScraperIdealista(api_key=os.getenv("SCRAPER_API_KEY"))
+        # elif portal.lower() == 'fotocasa':
+        #     scraper = ScraperFotocasa(api_key=os.getenv("SCRAPER_API_KEY"))
         else:
-            dades_immobles = loop.run_until_complete(extreure_dades_immobles(url))
-            if not dades_immobles:
-                return jsonify({'error': 'No s\'han trobat immobles a la URL proporcionada.'}), 404
+            return jsonify({'error': f"Portal {portal} no suportat."}), 400
 
-            for dades in dades_immobles:
-                nou_immoble = Immoble(
-                    titol=dades['titol'],
-                    ciutat=dades.get('ubicacio', ''),
-                    preu=dades.get('preu', 0),
-                    caracteristiques="; ".join(dades.get('caracteristiques', []))
-                )
-                db.session.add(nou_immoble)
-            db.session.commit()
+        # Executar scraping
+        dades = scraper.extreu_dades(url)
+        if not dades:
+            return jsonify({'error': 'No s\'han trobat dades.'}), 404
 
-            return jsonify({'missatge': 'Dades extretes i afegides correctament'}), 201
+        # Crear i guardar l'immoble
+        nou_immoble = create_or_update_immoble(dades, portal)
+        db.session.add(nou_immoble)
+        db.session.commit()
 
+        return jsonify({'missatge': 'Dades extretes i afegides correctament', 'immoble': immoble_schema.dump(nou_immoble)}), 201
     except Exception as e:
         return jsonify({'error': f"Error durant el scraping: {str(e)}"}), 500
 
@@ -159,18 +156,9 @@ def actualitzar_immoble(id):
     immoble = Immoble.query.get_or_404(id)
     dades = request.json
     try:
-        immoble.adreca = dades.get('adreca', immoble.adreca)
-        immoble.ciutat = dades.get('ciutat', immoble.ciutat)
-        immoble.preu = dades.get('preu', immoble.preu)
-        immoble.superficie = dades.get('superficie', immoble.superficie)
-        immoble.habitacions = dades.get('habitacions', immoble.habitacions)
-        immoble.tipus = dades.get('tipus', immoble.tipus)
-        immoble.certificat_energia = dades.get('certificat_energia', immoble.certificat_energia)
-        immoble.titol = dades.get('titol', immoble.titol)
-        immoble.caracteristiques = "; ".join(dades.get('caracteristiques', immoble.caracteristiques.split("; ")))
-
+        updated_immoble = create_or_update_immoble(dades, immoble.portal, immoble)
         db.session.commit()
-        return jsonify(immoble_schema.dump(immoble))
+        return jsonify(immoble_schema.dump(updated_immoble))
     except Exception as e:
         return jsonify({'error': f"Error al actualitzar l'immoble: {str(e)}"}), 400
 
