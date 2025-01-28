@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 
-
 class ScraperIdealista:
     """
     Scraper per extreure dades d'Idealista utilitzant l'API de ScraperAPI.
@@ -41,22 +40,27 @@ class ScraperIdealista:
             dades = {
                 'títol': soup.select_one("h1.main-info__title-main").text.strip()
                 if soup.select_one("h1.main-info__title-main")
-                else "Títol no disponible",
+                else None,
                 'preu': soup.select_one(".price").text.strip()
                 if soup.select_one(".price")
-                else "Preu no disponible",
+                else None,
                 'superficie_construida': soup.select_one(".info-features span:nth-child(1)").text.strip()
                 if soup.select_one(".info-features span:nth-child(1)")
-                else "Superfície no disponible",
+                else None,
                 'habitacions': soup.select_one(".info-features span:nth-child(2)").text.strip()
                 if soup.select_one(".info-features span:nth-child(2)")
-                else "Nombre d'habitacions no disponible",
+                else None,
                 'banys': soup.select_one(".info-features span:nth-child(3)").text.strip()
                 if soup.select_one(".info-features span:nth-child(3)")
-                else "Nombre de banys no disponible",
+                else None,
                 'estat_conservacio': soup.find(text="Segona mà/bon estat").strip()
                 if soup.find(text="Segona mà/bon estat")
-                else "Estat de conservació no disponible",
+                else None,
+                'caracteristiques': "; ".join(
+                    [el.text.strip() for el in soup.select(".details-property_features ul li")]
+                )
+                if soup.select(".details-property_features ul li")
+                else None,
                 'terrassa': "Sí"
                 if "Terrassa" in soup.text or "balcó" in soup.text
                 else "No",
@@ -67,41 +71,37 @@ class ScraperIdealista:
                 else "No inclòs",
                 'districte': soup.select_one(".main-info__title-minor").text.strip()
                 if soup.select_one(".main-info__title-minor")
-                else "Districte no disponible",
+                else None,
                 'descripcio': soup.select_one(".comment p").text.strip()
                 if soup.select_one(".comment p")
-                else "Descripció no disponible",
+                else None,
                 'preu_per_m2': soup.select_one(".squaredmeterprice .flex-feature-details").text.strip()
                 if soup.select_one(".squaredmeterprice .flex-feature-details")
-                else "Preu per m² no disponible",
+                else None,
             }
 
             # Certificat energètic
             certificat = soup.select_one(".details-property-feature-two .details-property_features ul")
             if certificat:
                 try:
-                    consum = certificat.find_all("li")[0].text.split(":")[1].strip()
+                    consum = certificat.find_all("li")[0].text.split(":")[1].strip() if "Consum" in certificat.text else None
                 except (IndexError, AttributeError):
-                    consum = "No disponible"
+                    consum = None
 
                 try:
-                    emissions = certificat.find_all("li")[1].text.split(":")[1].strip()
+                    emissions = certificat.find_all("li")[1].text.split(":")[1].strip() if "Emissions" in certificat.text else None
                 except (IndexError, AttributeError):
-                    emissions = "No disponible"
+                    emissions = None
 
                 dades['consum_energia'] = consum
                 dades['emissions_energia'] = emissions
             else:
-                dades['consum_energia'] = "No disponible"
-                dades['emissions_energia'] = "No disponible"
-
-            # Validació final per evitar errors amb valors inesperats
-            for clau, valor in dades.items():
-                if isinstance(valor, str) and not valor.strip():
-                    dades[clau] = "No disponible"
+                dades['consum_energia'] = None
+                dades['emissions_energia'] = None
 
             return dades
 
         except Exception as e:
-            raise ValueError(f"Error durant l'extracció: {e}")
+            print(f"Error durant l'extracció: {e}")
+            return None
 
