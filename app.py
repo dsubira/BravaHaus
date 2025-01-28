@@ -67,7 +67,7 @@ def create_or_update_immoble(dades, portal, immoble=None):
     immoble.habitacions = dades.get('habitacions', immoble.habitacions)
     immoble.banys = dades.get('banys', immoble.banys)
     immoble.estat_conservacio = dades.get('estat_conservacio', immoble.estat_conservacio)
-    immoble.caracteristiques = "; ".join(dades.get('caracteristiques', []).split("; "))
+    immoble.caracteristiques = "; ".join(dades.get('caracteristiques', immoble.caracteristiques.split("; ")))
     immoble.certificat_energia = dades.get('certificat_energia', immoble.certificat_energia)
     immoble.terrassa = dades.get('terrassa', immoble.terrassa) == "Sí"
     immoble.piscina = dades.get('piscina', immoble.piscina) == "Sí"
