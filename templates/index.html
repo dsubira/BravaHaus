@@ -4,8 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gestió d'immobles amb BravaHaus">
+    <meta name="keywords" content="immobles, llistat, gestió, immobiliària">
     <title>BravaHaus</title>
-    <link rel="stylesheet" href="static/css/estils.css">
+    <link rel="stylesheet" href="/static/css/estils.css">
 </head>
 
 <body>
@@ -25,29 +27,20 @@
 
     <main>
         <section id="property-list">
+            {% for immoble in immobles %}
             <div class="property-card">
-                <img src="static/images/property1.avif" alt="Imatge de la propietat">
+                <img src="{{ immoble.fotos.split(',')[0] if immoble.fotos else '/static/images/default.jpg' }}" 
+                     alt="Imatge de {{ immoble.titol }}">
                 <div class="property-details">
-                    <h2>Apartament modern</h2>
-                    <p><span class="icon">📍</span> Ubicació: Barcelona</p>
-                    <p><span class="icon">💰</span> Preu: 250.000 €</p>
-                    <p><span class="icon">🏠</span> Superfície: 80m²</p>
-                    <p><span class="icon">🛏️</span> Habitacions: 2 | <span class="icon">🛁</span> Banys: 1</p>
+                    <h2>{{ immoble.titol }}</h2>
+                    <p><span class="icon">📍</span> {{ immoble.ciutat }}</p>
+                    <p><span class="icon">💰</span> {{ immoble.preu }} €</p>
+                    <p><span class="icon">🏠</span> {{ immoble.superficie }} m²</p>
+                    <p><span class="icon">🛏️</span> {{ immoble.habitacions }} | <span class="icon">🛁</span> {{ immoble.banys }}</p>
                 </div>
-                <button>Veure detalls</button>
+                <a href="/detalls/{{ immoble.id }}"><button>Veure detalls</button></a>
             </div>
-
-            <div class="property-card">
-                <img src="static/images/property2.avif" alt="Imatge de la propietat">
-                <div class="property-details">
-                    <h2>Estudi acollidor</h2>
-                    <p><span class="icon">📍</span> Ubicació: Girona</p>
-                    <p><span class="icon">💰</span> Preu: 120.000 €</p>
-                    <p><span class="icon">🏠</span> Superfície: 50m²</p>
-                    <p><span class="icon">🛏️</span> Habitacions: 1 | <span class="icon">🛁</span> Banys: 1</p>
-                </div>
-                <button>Veure detalls</button>
-            </div>
+            {% endfor %}
         </section>
     </main>
 
@@ -59,5 +52,3 @@
 </body>
 
 </html>
-
-
