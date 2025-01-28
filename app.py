@@ -39,9 +39,12 @@ class Immoble(db.Model):
     aire_condicionat = db.Column(db.Boolean, default=False)
     parking = db.Column(db.Boolean, default=False)
     descripcio = db.Column(db.Text, nullable=True)
+    ubicacio = db.Column(db.String(500), nullable=True)
+    ubicacio_g = db.Column(db.String(500), nullable=True)  # Coordenades
     latitud = db.Column(db.Float, nullable=True)
     longitud = db.Column(db.Float, nullable=True)
-    portal = db.Column(db.String(50), nullable=False)
+    portal = db.Column(db.String(50), nullable=True)
+    link = db.Column(db.String(500), nullable=True)
 
 # Serializer
 class ImmobleSchema(ma.SQLAlchemyAutoSchema):
@@ -59,7 +62,7 @@ def create_or_update_immoble(dades, portal, immoble=None):
     if immoble is None:
         immoble = Immoble()
 
-    immoble.titol = dades.get('títol', immoble.titol)
+    immoble.titol = dades.get('titol', immoble.titol)
     immoble.adreca = dades.get('adreca', immoble.adreca)
     immoble.ciutat = dades.get('ciutat', immoble.ciutat)
     immoble.preu = dades.get('preu', immoble.preu)
@@ -67,10 +70,7 @@ def create_or_update_immoble(dades, portal, immoble=None):
     immoble.habitacions = dades.get('habitacions', immoble.habitacions)
     immoble.banys = dades.get('banys', immoble.banys)
     immoble.estat_conservacio = dades.get('estat_conservacio', immoble.estat_conservacio)
-    immoble.caracteristiques = "; ".join(
-        dades.get('caracteristiques', "").split("; ")
-        if dades.get('caracteristiques') else []
-    )
+    immoble.caracteristiques = "; ".join(dades.get('caracteristiques', "").split("; ")) if dades.get('caracteristiques') else immoble.caracteristiques
     immoble.certificat_energia = dades.get('certificat_energia', immoble.certificat_energia)
     immoble.terrassa = dades.get('terrassa', immoble.terrassa) == "Sí"
     immoble.piscina = dades.get('piscina', immoble.piscina) == "Sí"
@@ -78,6 +78,12 @@ def create_or_update_immoble(dades, portal, immoble=None):
     immoble.parking = dades.get('parking', immoble.parking) == "Inclòs"
     immoble.descripcio = dades.get('descripcio', immoble.descripcio)
     immoble.portal = portal
+    immoble.ubicacio = dades.get('ubicacio', immoble.ubicacio)
+    immoble.latitud = dades.get('latitud', immoble.latitud)
+    immoble.longitud = dades.get('longitud', immoble.longitud)
+    immoble.link = dades.get('link', immoble.link)
+    immoble.ubicacio_g = f"POINT({immoble.longitud} {immoble.latitud})" if immoble.latitud and immoble.longitud else immoble.ubicacio_g
+
     return immoble
 
 # Rutes HTML
