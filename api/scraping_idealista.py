@@ -80,12 +80,12 @@ class ScraperIdealista:
             certificat = soup.select_one(".details-property-feature-two .details-property_features ul")
             if certificat:
                 try:
-                    consum = certificat.find_all("li")[0].text.split(":")[1].strip() if "Consum" in certificat.text else "No disponible"
+                    consum = certificat.find_all("li")[0].text.split(":")[1].strip()
                 except (IndexError, AttributeError):
                     consum = "No disponible"
 
                 try:
-                    emissions = certificat.find_all("li")[1].text.split(":")[1].strip() if "Emissions" in certificat.text else "No disponible"
+                    emissions = certificat.find_all("li")[1].text.split(":")[1].strip()
                 except (IndexError, AttributeError):
                     emissions = "No disponible"
 
@@ -95,8 +95,13 @@ class ScraperIdealista:
                 dades['consum_energia'] = "No disponible"
                 dades['emissions_energia'] = "No disponible"
 
+            # Validació final per evitar errors amb valors inesperats
+            for clau, valor in dades.items():
+                if isinstance(valor, str) and not valor.strip():
+                    dades[clau] = "No disponible"
+
             return dades
 
         except Exception as e:
-            print(f"Error durant l'extracció: {e}")
-            return None
+            raise ValueError(f"Error durant l'extracció: {e}")
+
