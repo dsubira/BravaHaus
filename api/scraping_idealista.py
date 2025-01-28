@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import re
 
 
 class ScraperIdealista:
@@ -36,6 +37,33 @@ class ScraperIdealista:
         """
         return "idealista.com" in url
 
+    def neteja_preu(self, preu_text: str) -> float:
+        """
+        Elimina símbols com '€' i retorna el valor com un float.
+        """
+        if preu_text:
+            preu_netejat = re.sub(r"[^\d.]", "", preu_text)  # Conserva només dígits i punts.
+            return float(preu_netejat) if preu_netejat else None
+        return None
+
+    def neteja_superficie(self, superficie_text: str) -> float:
+        """
+        Elimina 'm²' i retorna el valor com un float.
+        """
+        if superficie_text:
+            superficie_netejada = re.sub(r"[^\d.]", "", superficie_text)
+            return float(superficie_netejada) if superficie_netejada else None
+        return None
+
+    def neteja_habitacions_banys(self, text: str) -> int:
+        """
+        Extreu el primer número d'un text (exemple: '1 dorm.' -> 1).
+        """
+        if text:
+            match = re.search(r"\d+", text)
+            return int(match.group()) if match else None
+        return None
+
     def extreu_dades(self, url: str, premium: bool = False) -> dict:
         """
         Extreu les dades d'un immoble donada una URL d'Idealista.
@@ -51,18 +79,18 @@ class ScraperIdealista:
                 'títol': soup.select_one("h1.main-info__title-main").text.strip()
                 if soup.select_one("h1.main-info__title-main")
                 else None,
-                'preu': soup.select_one(".price").text.strip()
-                if soup.select_one(".price")
-                else None,
-                'superficie_construida': soup.select_one(".info-features span:nth-child(1)").text.strip()
-                if soup.select_one(".info-features span:nth-child(1)")
-                else None,
-                'habitacions': soup.select_one(".info-features span:nth-child(2)").text.strip()
-                if soup.select_one(".info-features span:nth-child(2)")
-                else None,
-                'banys': soup.select_one(".info-features span:nth-child(3)").text.strip()
-                if soup.select_one(".info-features span:nth-child(3)")
-                else None,
+                'preu': self.neteja_preu(
+                    soup.select_one(".price").text.strip()
+                ) if soup.select_one(".price") else None,
+                'superficie_construida': self.neteja_superficie(
+                    soup.select_one(".info-features span:nth-child(1)").text.strip()
+                ) if soup.select_one(".info-features span:nth-child(1)") else None,
+                'habitacions': self.neteja_habitacions_banys(
+                    soup.select_one(".info-features span:nth-child(2)").text.strip()
+                ) if soup.select_one(".info-features span:nth-child(2)") else None,
+                'banys': self.neteja_habitacions_banys(
+                    soup.select_one(".info-features span:nth-child(3)").text.strip()
+                ) if soup.select_one(".info-features span:nth-child(3)") else None,
                 'estat_conservacio': soup.find(text="Segona mà/bon estat").strip()
                 if soup.find(text="Segona mà/bon estat")
                 else None,
