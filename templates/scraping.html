@@ -4,41 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scraping d'Immobles</title>
-    <link rel="stylesheet" href="/static/css/estils.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estils.css') }}">
 </head>
 <body>
     <header>
-        <h1>Scraping d'Immobles</h1>
+        <nav>
+            <div class="logo">Gestió Immobiliària</div>
+            <ul class="menu">
+                <li><a href="/">Inici</a></li>
+                <li><a href="/scraping">Scraping</a></li>
+            </ul>
+        </nav>
     </header>
+
     <main>
-        <form id="scraping-form">
-            <label for="url">URL:</label>
-            <input type="url" id="url" name="url" required>
-            <button type="submit">Inicia Scraping</button>
-        </form>
-        <div id="resultat"></div>
+        <section>
+            <h1>Scraping d'Immobles</h1>
+            <p>Proporciona una URL d'un portal immobiliari per extreure dades automàticament.</p>
+            <form id="scraping-form">
+                <label for="url">URL:</label>
+                <input type="url" id="url" name="url" placeholder="https://www.idealista.com/..." required>
+                <div class="button-group">
+                    <button type="submit" id="scraping-button">Inicia Scraping</button>
+                    <button type="button" id="reset-button">Esborra URL</button>
+                </div>
+            </form>
+            <div id="resultat"></div>
+        </section>
     </main>
+
     <footer>
-        <p>&copy; 2025 - Gestió d'Immobles</p>
+        <p>&copy; 2025 Gestió Immobiliària. Tots els drets reservats.</p>
     </footer>
+
     <script>
-        document.getElementById('scraping-form').addEventListener('submit', async function(e) {
+        // Captura els elements del DOM
+        const scrapingForm = document.getElementById('scraping-form');
+        const urlInput = document.getElementById('url');
+        const resultatDiv = document.getElementById('resultat');
+        const resetButton = document.getElementById('reset-button');
+
+        // Event listener pel formulari de scraping
+        scrapingForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const url = document.getElementById('url').value;
+            const url = urlInput.value;
+
+            // Esborra contingut previ del resultat
+            resultatDiv.innerHTML = '<p>Processant...</p>';
+
             try {
-                const res = await fetch('/api/scraping', {
+                const resposta = await fetch('/api/scraping', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url })
                 });
-                const dades = await res.json();
-                document.getElementById('resultat').innerHTML = `<pre>${JSON.stringify(dades, null, 2)}</pre>`;
+
+                const dades = await resposta.json();
+
+                if (resposta.ok) {
+                    const portal = url.includes("idealista") ? "Idealista" : "Desconegut";
+                    resultatDiv.innerHTML = `
+                        <h2>Resultat del Scraping</h2>
+                        <p><strong>Portal detectat:</strong> ${portal}</p>
+                        <h3>Dades extretes:</h3>
+                        <ul>
+                            <li><strong>Títol:</strong> ${dades.immoble.titol || 'No disponible'}</li>
+                            <li><strong>Preu:</strong> ${dades.immoble.preu || 'No disponible'} €</li>
+                            <li><strong>Adreça:</strong> ${dades.immoble.adreca || 'No disponible'}</li>
+                            <li><strong>Ciutat:</strong> ${dades.immoble.ciutat || 'No disponible'}</li>
+                            <li><strong>Superfície:</strong> ${dades.immoble.superficie || 'No disponible'} m²</li>
+                            <li><strong>Habitacions:</strong> ${dades.immoble.habitacions || 'No disponible'}</li>
+                            <li><strong>Banys:</strong> ${dades.immoble.banys || 'No disponible'}</li>
+                            <li><strong>Terrassa:</strong> ${dades.immoble.terrassa ? 'Sí' : 'No'}</li>
+                            <li><strong>Piscina:</strong> ${dades.immoble.piscina ? 'Sí' : 'No'}</li>
+                        </ul>
+                    `;
+                } else {
+                    resultatDiv.innerHTML = `<p style="color:red;">Error: ${dades.error}</p>`;
+                }
             } catch (error) {
-                console.error(error);
+                resultatDiv.innerHTML = `<p style="color:red;">Error del servidor: ${error.message}</p>`;
             }
+        });
+
+        // Esborrar la URL del formulari
+        resetButton.addEventListener('click', () => {
+            urlInput.value = '';
+            resultatDiv.innerHTML = '';
         });
     </script>
 </body>
 </html>
-
-
