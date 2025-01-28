@@ -92,7 +92,7 @@ def llistar_immobles():
     return render_template('llistar_immobles.html', immobles=immobles)
 
 @app.route('/scraping')
-def scraping_page():
+def scraping():
     return render_template('scraping.html')
 
 @app.route('/detalls/<int:immoble_id>')
