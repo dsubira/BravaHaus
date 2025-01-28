@@ -76,9 +76,9 @@ class ScraperIdealista:
 
             # Diccionari per emmagatzemar les dades extretes
             dades = {
-                'títol': soup.select_one("h1.main-info__title-main").text.strip()
-                if soup.select_one("h1.main-info__title-main")
-                else None,
+                'títol': soup.select_one("span.main-info__title-main").text.strip()
+                if soup.select_one("span.main-info__title-main")
+                else "Sense títol",  # Valor per defecte si no es troba
                 'preu': self.neteja_preu(
                     soup.select_one(".price").text.strip()
                 ) if soup.select_one(".price") else None,
@@ -131,7 +131,7 @@ class ScraperIdealista:
                     pass
 
             # Mostrem les dades capturades per depurar
-            print("Dades extretes pel scraper:")
+            print("Dades extretes pel scraper abans d'inserir:")
             for clau, valor in dades.items():
                 print(f"{clau}: {valor}")
 
@@ -140,6 +140,7 @@ class ScraperIdealista:
         except Exception as e:
             print(f"Error durant l'extracció: {e}")
             return None
+
 
 
 
