@@ -131,14 +131,16 @@ class ScraperIdealista:
                     pass
 
             # Mostrem les dades capturades per depurar
-            print("Dades extretes pel scraper abans d'inserir:")
+            print("\n=== Dades extretes pel scraper ===")
             for clau, valor in dades.items():
                 print(f"{clau}: {valor}")
 
             return dades
 
         except Exception as e:
-            print(f"Error durant l'extracció: {e}")
+            # Mostrem l'error i les dades capturades en cas de fallada
+            print("\n=== Error durant el scraping ===")
+            print(f"Error: {e}")
             return None
 
 
