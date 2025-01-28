@@ -30,10 +30,19 @@ class ScraperIdealista:
         except requests.RequestException as e:
             raise Exception(f"Error obtenint la pàgina: {e}")
 
+    def valida_url(self, url: str) -> bool:
+        """
+        Valida si l'URL proporcionat és d'Idealista.
+        """
+        return "idealista.com" in url
+
     def extreu_dades(self, url: str, premium: bool = False) -> dict:
         """
         Extreu les dades d'un immoble donada una URL d'Idealista.
         """
+        if not self.valida_url(url):
+            raise ValueError("L'URL proporcionat no és d'Idealista.")
+
         try:
             soup = self.fetch_page(url, render=premium)
 
@@ -98,5 +107,6 @@ class ScraperIdealista:
         except Exception as e:
             print(f"Error durant l'extracció: {e}")
             return None
+
 
 
