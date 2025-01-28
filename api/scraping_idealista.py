@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
+
 class ScraperIdealista:
     """
     Scraper per extreure dades d'Idealista utilitzant l'API de ScraperAPI.
@@ -69,35 +70,30 @@ class ScraperIdealista:
                 'parking': "Inclòs"
                 if soup.find(text="Pàrking inclòs")
                 else "No inclòs",
-                'districte': soup.select_one(".main-info__title-minor").text.strip()
+                'ubicacio': soup.select_one(".main-info__title-minor").text.strip()
                 if soup.select_one(".main-info__title-minor")
                 else None,
                 'descripcio': soup.select_one(".comment p").text.strip()
                 if soup.select_one(".comment p")
                 else None,
-                'preu_per_m2': soup.select_one(".squaredmeterprice .flex-feature-details").text.strip()
-                if soup.select_one(".squaredmeterprice .flex-feature-details")
+                'latitud': None,  # Afegim latitud per processar coordenades si cal
+                'longitud': None,  # Afegim longitud per processar coordenades si cal
+                'link': url,  # Guardem l'URL original per referència
+                'certificat_energia': soup.select_one(".energy-certification").text.strip()
+                if soup.select_one(".energy-certification")
                 else None,
             }
 
-            # Certificat energètic
-            certificat = soup.select_one(".details-property-feature-two .details-property_features ul")
-            if certificat:
+            # Coordenades (dummy fins que es defineixi un mètode per extreure-les)
+            # Nota: Caldrà adaptar segons on es trobin les coordenades a Idealista.
+            coordenades = soup.select_one("#coordinates")
+            if coordenades:
                 try:
-                    consum = certificat.find_all("li")[0].text.split(":")[1].strip() if "Consum" in certificat.text else None
-                except (IndexError, AttributeError):
-                    consum = None
-
-                try:
-                    emissions = certificat.find_all("li")[1].text.split(":")[1].strip() if "Emissions" in certificat.text else None
-                except (IndexError, AttributeError):
-                    emissions = None
-
-                dades['consum_energia'] = consum
-                dades['emissions_energia'] = emissions
-            else:
-                dades['consum_energia'] = None
-                dades['emissions_energia'] = None
+                    lat, lon = coordenades["data-lat"], coordenades["data-lon"]
+                    dades["latitud"] = float(lat)
+                    dades["longitud"] = float(lon)
+                except (KeyError, ValueError):
+                    pass
 
             return dades
 
