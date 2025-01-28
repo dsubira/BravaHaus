@@ -68,10 +68,9 @@ def create_or_update_immoble(dades, portal, immoble=None):
     immoble.banys = dades.get('banys', immoble.banys)
     immoble.estat_conservacio = dades.get('estat_conservacio', immoble.estat_conservacio)
     immoble.caracteristiques = "; ".join(
-    dades.get('caracteristiques', "").split("; ")
-    if dades.get('caracteristiques') else []
-)
-    # immoble.caracteristiques = "; ".join(dades.get('caracteristiques', immoble.caracteristiques.split("; ")))
+        dades.get('caracteristiques', "").split("; ")
+        if dades.get('caracteristiques') else []
+    )
     immoble.certificat_energia = dades.get('certificat_energia', immoble.certificat_energia)
     immoble.terrassa = dades.get('terrassa', immoble.terrassa) == "Sí"
     immoble.piscina = dades.get('piscina', immoble.piscina) == "Sí"
@@ -171,4 +170,5 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
 
