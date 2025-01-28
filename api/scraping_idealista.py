@@ -100,4 +100,3 @@ class ScraperIdealista:
         except Exception as e:
             print(f"Error durant l'extracció: {e}")
             return None
-
