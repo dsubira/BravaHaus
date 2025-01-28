@@ -62,36 +62,34 @@ class ScraperIdealista:
                 )
                 if soup.select(".details-property_features ul li")
                 else None,
-                'terrassa': "Sí"
-                if "Terrassa" in soup.text or "balcó" in soup.text
-                else "No",
+                'terrassa': "Sí" if "Terrassa" in soup.text or "balcó" in soup.text else "No",
                 'piscina': "Sí" if "Piscina" in soup.text else "No",
                 'aire_condicionat': "Sí" if "aire condicionat" in soup.text.lower() else "No",
-                'parking': "Inclòs"
-                if soup.find(text="Pàrking inclòs")
-                else "No inclòs",
+                'parking': "Inclòs" if "Pàrking inclòs" in soup.text else "No inclòs",
                 'ubicacio': soup.select_one(".main-info__title-minor").text.strip()
                 if soup.select_one(".main-info__title-minor")
                 else None,
                 'descripcio': soup.select_one(".comment p").text.strip()
                 if soup.select_one(".comment p")
                 else None,
-                'latitud': None,  # Afegim latitud per processar coordenades si cal
-                'longitud': None,  # Afegim longitud per processar coordenades si cal
-                'link': url,  # Guardem l'URL original per referència
+                'latitud': None,  # Placeholder per a coordenades
+                'longitud': None,  # Placeholder per a coordenades
+                'ubicacio_g': None,  # Placeholder per a punt geogràfic
+                'portal': 'Idealista',
+                'link': url,
                 'certificat_energia': soup.select_one(".energy-certification").text.strip()
                 if soup.select_one(".energy-certification")
                 else None,
             }
 
-            # Coordenades (dummy fins que es defineixi un mètode per extreure-les)
-            # Nota: Caldrà adaptar segons on es trobin les coordenades a Idealista.
+            # Coordenades (si existeixen a la pàgina)
             coordenades = soup.select_one("#coordinates")
             if coordenades:
                 try:
                     lat, lon = coordenades["data-lat"], coordenades["data-lon"]
                     dades["latitud"] = float(lat)
                     dades["longitud"] = float(lon)
+                    dades["ubicacio_g"] = f"SRID=4326;POINT({lon} {lat})"
                 except (KeyError, ValueError):
                     pass
 
