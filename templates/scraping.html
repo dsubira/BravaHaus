@@ -4,74 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scraping d'Immobles</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/estils.css') }}">
+    <link rel="stylesheet" href="/static/css/estils.css">
 </head>
 <body>
     <header>
-        <nav>
-            <div class="logo">Gestió Immobiliària</div>
-            <ul class="menu">
-                <li><a href="/">Inici</a></li>
-                <li><a href="/scraping">Scraping</a></li>
-            </ul>
-        </nav>
+        <h1>Scraping d'Immobles</h1>
     </header>
-
     <main>
-        <section>
-            <h1>Scraping d'Immobles</h1>
-            <p>Proporciona una URL d'un portal immobiliari per extreure dades automàticament.</p>
-            <form id="scraping-form">
-                <label for="url">URL:</label>
-                <input type="url" id="url" name="url" placeholder="Entra la URL aquí" required>
-                <button type="submit">Inicia Scraping</button>
-            </form>
-            <div id="resultat"></div>
-        </section>
+        <form id="scraping-form">
+            <label for="url">URL:</label>
+            <input type="url" id="url" name="url" required>
+            <button type="submit">Inicia Scraping</button>
+        </form>
+        <div id="resultat"></div>
     </main>
-
     <footer>
-        <p>&copy; 2025 Gestió Immobiliària. Tots els drets reservats.</p>
+        <p>&copy; 2025 - Gestió d'Immobles</p>
     </footer>
-
     <script>
         document.getElementById('scraping-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const url = document.getElementById('url').value;
-
             try {
-                const resposta = await fetch('/api/scraping', {
+                const res = await fetch('/api/scraping', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url })
                 });
-
-                const dades = await resposta.json();
-
-                if (resposta.ok) {
-                    if (Array.isArray(dades)) {
-                        document.getElementById('resultat').innerHTML =
-                            dades.map(immoble => `
-                                <div>
-                                    <h2>${immoble.adreca}</h2>
-                                    <p><strong>Ciutat:</strong> ${immoble.ciutat}</p>
-                                    <p><strong>Preu:</strong> ${immoble.preu} €</p>
-                                </div>
-                            `).join('');
-                    } else {
-                        document.getElementById('resultat').innerHTML =
-                            `<p style="color:red;">Error: Resposta inesperada del servidor.</p>`;
-                    }
-                } else {
-                    document.getElementById('resultat').innerHTML =
-                        `<p style="color:red;">Error: ${dades.error}</p>`;
-                }
+                const dades = await res.json();
+                document.getElementById('resultat').innerHTML = `<pre>${JSON.stringify(dades, null, 2)}</pre>`;
             } catch (error) {
-                document.getElementById('resultat').innerHTML =
-                    `<p style="color:red;">Error del servidor: ${error.message}</p>`;
+                console.error(error);
             }
         });
     </script>
 </body>
 </html>
+
 
