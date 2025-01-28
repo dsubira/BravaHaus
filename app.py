@@ -5,14 +5,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from dotenv import load_dotenv
 from api.scraping_idealista import ScraperIdealista
-# Si hi ha altres portals:
-# from api.scraping_fotocasa import ScraperFotocasa
-# from api.scraping_habitaclia import ScraperHabitaclia
 
 # Carregar variables d'entorn
 load_dotenv()
 
-# Configurar l'aplicació
+# Configuració de l'aplicació
 database_url = os.getenv('DATABASE_URL')
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://")
@@ -24,6 +21,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Inicialitzar extensions
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
+
 
 # Models de la base de dades
 class Immoble(db.Model):
@@ -45,7 +43,7 @@ class Immoble(db.Model):
     descripcio = db.Column(db.Text, nullable=True)
     latitud = db.Column(db.Float, nullable=True)
     longitud = db.Column(db.Float, nullable=True)
-    portal = db.Column(db.String(50), nullable=False)  # Idealista, Fotocasa, etc.
+    portal = db.Column(db.String(50), nullable=False)
 
 # Serializer
 class ImmobleSchema(ma.SQLAlchemyAutoSchema):
@@ -54,6 +52,7 @@ class ImmobleSchema(ma.SQLAlchemyAutoSchema):
 
 immoble_schema = ImmobleSchema()
 immobles_schema = ImmobleSchema(many=True)
+
 
 # Helpers
 def create_or_update_immoble(dades, portal, immoble=None):
@@ -81,100 +80,43 @@ def create_or_update_immoble(dades, portal, immoble=None):
     immoble.portal = portal
     return immoble
 
-# Rutes principals
+
+# Rutes
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', missatge="Benvingut al gestor d'immobles!")
 
-@app.route('/afegir')
-def afegir_immoble():
-    return render_template('afegir_immoble.html')
-
-@app.route('/llistat')
-def llistar_immobles():
-    immobles = Immoble.query.all()
-    return render_template('llistar_immobles.html', immobles=immobles)
-
-@app.route('/scraping')
-def scraping():
-    return render_template('scraping.html')
-
-# Rutes de l'API
-@app.route('/api/immobles', methods=['GET'])
-def obtenir_immobles():
-    immobles = Immoble.query.all()
-    return jsonify(immobles_schema.dump(immobles))
-
-@app.route('/api/immobles/<int:id>', methods=['GET'])
-def obtenir_immoble(id):
-    immoble = Immoble.query.get_or_404(id)
-    return jsonify(immoble_schema.dump(immoble))
-
-@app.route('/api/immobles', methods=['POST'])
-def afegir_immoble_api():
-    dades = request.json
-    try:
-        nou_immoble = create_or_update_immoble(dades, portal="Manual")
-        db.session.add(nou_immoble)
-        db.session.commit()
-        return jsonify(immoble_schema.dump(nou_immoble)), 201
-    except Exception as e:
-        return jsonify({'error': f"Error al crear l'immoble: {str(e)}"}), 400
 
 @app.route('/api/scraping', methods=['POST'])
 def scraping_immobles():
     url = request.json.get('url')
-    portal = request.json.get('portal')  # Especificar el portal (idealista, fotocasa, etc.)
+    portal = request.json.get('portal')
     if not url or not portal:
         return jsonify({'error': 'Cal proporcionar una URL i un portal'}), 400
 
     try:
-        # Seleccionar el scraper segons el portal
         if portal.lower() == 'idealista':
             scraper = ScraperIdealista(api_key=os.getenv("SCRAPER_API_KEY"))
-        # elif portal.lower() == 'fotocasa':
-        #     scraper = ScraperFotocasa(api_key=os.getenv("SCRAPER_API_KEY"))
         else:
             return jsonify({'error': f"Portal {portal} no suportat."}), 400
 
-        # Executar scraping
         dades = scraper.extreu_dades(url)
         if not dades:
             return jsonify({'error': 'No s\'han trobat dades.'}), 404
 
-        # Crear i guardar l'immoble
         nou_immoble = create_or_update_immoble(dades, portal)
         db.session.add(nou_immoble)
         db.session.commit()
 
-        return jsonify({'missatge': 'Dades extretes i afegides correctament', 'immoble': immoble_schema.dump(nou_immoble)}), 201
+        return jsonify({'missatge': 'Dades extretes correctament', 'immoble': immoble_schema.dump(nou_immoble)}), 201
     except Exception as e:
         return jsonify({'error': f"Error durant el scraping: {str(e)}"}), 500
 
-@app.route('/api/immobles/<int:id>', methods=['PUT'])
-def actualitzar_immoble(id):
-    immoble = Immoble.query.get_or_404(id)
-    dades = request.json
-    try:
-        updated_immoble = create_or_update_immoble(dades, immoble.portal, immoble)
-        db.session.commit()
-        return jsonify(immoble_schema.dump(updated_immoble))
-    except Exception as e:
-        return jsonify({'error': f"Error al actualitzar l'immoble: {str(e)}"}), 400
-
-@app.route('/api/immobles/<int:id>', methods=['DELETE'])
-def eliminar_immoble(id):
-    immoble = Immoble.query.get_or_404(id)
-    try:
-        db.session.delete(immoble)
-        db.session.commit()
-        return '', 204
-    except Exception as e:
-        return jsonify({'error': f"Error al eliminar l'immoble: {str(e)}"}), 400
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
 
 
