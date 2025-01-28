@@ -1,10 +1,11 @@
 import os
-import asyncio
 from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from dotenv import load_dotenv
 from api.scraping_idealista import ScraperIdealista
+# Si s'implementen altres portals en el futur
+# from api.scraping_fotocasa import ScraperFotocasa
 
 # Carregar variables d'entorn
 load_dotenv()
@@ -45,10 +46,12 @@ class Immoble(db.Model):
     longitud = db.Column(db.Float, nullable=True)
     portal = db.Column(db.String(50), nullable=False)
 
+
 # Serializer
 class ImmobleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Immoble
+
 
 immoble_schema = ImmobleSchema()
 immobles_schema = ImmobleSchema(many=True)
@@ -84,14 +87,45 @@ def create_or_update_immoble(dades, portal, immoble=None):
         raise ValueError(f"Error al processar les dades de l'immoble: {e}")
 
 
-# Rutes
+# Rutes principals
 @app.route('/')
 def index():
+    """
+    Pàgina principal.
+    """
     return render_template('index.html', missatge="Benvingut al gestor d'immobles!")
 
 
+@app.route('/afegir')
+def afegir_immoble():
+    """
+    Pàgina per afegir immobles manualment.
+    """
+    return render_template('afegir_immoble.html')
+
+
+@app.route('/llistat')
+def llistar_immobles():
+    """
+    Pàgina per llistar els immobles desats.
+    """
+    return render_template('llistar_immobles.html')
+
+
+@app.route('/scraping')
+def scraping():
+    """
+    Pàgina per fer scraping de portals immobiliaris.
+    """
+    return render_template('scraping.html')
+
+
+# API: Scraping
 @app.route('/api/scraping', methods=['POST'])
 def scraping_immobles():
+    """
+    Ruta d'API per fer scraping.
+    """
     url = request.json.get('url')
     portal = request.json.get('portal')
     if not url or not portal:
@@ -101,6 +135,9 @@ def scraping_immobles():
         # Seleccionar scraper segons el portal
         if portal.lower() == 'idealista':
             scraper = ScraperIdealista(api_key=os.getenv("SCRAPER_API_KEY"))
+        # Si s'implementen més portals:
+        # elif portal.lower() == 'fotocasa':
+        #     scraper = ScraperFotocasa(api_key=os.getenv("SCRAPER_API_KEY"))
         else:
             return jsonify({'error': f"Portal {portal} no suportat."}), 400
 
